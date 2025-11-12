@@ -1,28 +1,72 @@
-import { useEffect } from "react";
-import { useRouter } from "next/router";
+// src/pages/dashboard.tsx
+import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
+// Remove: import NavBar from "../components/NavBar";
 
 export default function Dashboard() {
-  const { user, loading } = useAuth();
-  const router = useRouter();
+  const { user } = useAuth();
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!loading && !user) {
-      router.replace("/auth/login");
-    }
-  }, [loading, user, router]);
+    setLoading(false);
+  }, []);
 
-  if (loading) return <p>Loading...</p>;
-  if (!user) return null;
+  if (!user) {
+    return (
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          marginTop: "4rem",
+        }}
+      >
+        <div
+          style={{
+            width: 500,
+            padding: "2rem",
+            border: "1px solid #ccc",
+            borderRadius: 8,
+            boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
+            backgroundColor: "#fff",
+            textAlign: "center",
+          }}
+        >
+          <h2>Please login to access the dashboard.</h2>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Dashboard</h1>
-      <p>Welcome back, <strong>{user.name}</strong>!</p>
-      <p>Your email: {user.email}</p>
-      <p className="mt-4 text-gray-600">
-        This is a protected page only visible to logged-in users.
-      </p>
+    <div
+      style={{
+        display: "flex",
+        justifyContent: "center",
+        marginTop: "4rem",
+      }}
+    >
+      <div
+        style={{
+          width: 600,
+          padding: "2rem",
+          border: "1px solid #ccc",
+          borderRadius: 8,
+          boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
+          backgroundColor: "#fff",
+        }}
+      >
+        <h1 style={{ marginBottom: "1rem" }}>Dashboard</h1>
+        <p>
+          Welcome, <strong>{user.name || user.email}</strong>!
+        </p>
+
+        <p style={{ marginTop: "1rem" }}>
+          This is your dashboard. You can add portfolio items, write blog posts, and manage
+          your account here.
+        </p>
+
+        {loading && <p>Loading your data...</p>}
+      </div>
     </div>
   );
 }

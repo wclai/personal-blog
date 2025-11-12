@@ -1,49 +1,87 @@
 import Link from "next/link";
+import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
+import Modal from "./Modal";
 
 export default function NavBar() {
   const { user, logout } = useAuth();
+  const [isModalOpen, setModalOpen] = useState(false);
+
+  const handleLogout = () => {
+    setModalOpen(true);
+  };
+
+  const confirmLogout = () => {
+    logout();
+    setModalOpen(false);
+  };
+
+  const cancelLogout = () => setModalOpen(false);
 
   return (
-    <nav className="flex items-center justify-between bg-gray-800 text-white px-6 py-3">
-      <div className="text-xl font-bold">
-        <Link href="/">My Personal Blog</Link>
-      </div>
+    <>
+      <nav
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          padding: "1rem 2rem",
+          borderBottom: "1px solid #ccc",
+          marginBottom: "2rem",
+        }}
+      >
+        {/* Left side: feature buttons */}
+        <div>
+          <Link href="/" style={{ marginRight: 15 }}>
+            Home
+          </Link>
+          <Link href="/portfolio" style={{ marginRight: 15 }}>
+            Portfolio
+          </Link>
+          <Link href="/blog" style={{ marginRight: 15 }}>
+            Blog
+          </Link>
+        </div>
 
-      <div className="flex items-center space-x-4">
-        {user ? (
-          <>
-            <span className="text-sm">Hello, {user.name}</span>
-            <Link
-              href="/dashboard"
-              className="bg-blue-600 px-3 py-1 rounded hover:bg-blue-700"
-            >
-              Dashboard
-            </Link>
-            <button
-              onClick={logout}
-              className="bg-red-600 px-3 py-1 rounded hover:bg-red-700"
-            >
-              Logout
-            </button>
-          </>
-        ) : (
-          <>
-            <Link
-              href="/auth/login"
-              className="bg-blue-600 px-3 py-1 rounded hover:bg-blue-700"
-            >
-              Login
-            </Link>
-            <Link
-              href="/auth/register"
-              className="bg-green-600 px-3 py-1 rounded hover:bg-green-700"
-            >
-              Register
-            </Link>
-          </>
-        )}
-      </div>
-    </nav>
+        {/* Right side: login info or login/register */}
+        <div>
+          {user ? (
+            <>
+              <span style={{ marginRight: 10 }}>
+                Hi, {user.name || user.email}
+              </span>
+              <button
+                onClick={handleLogout}
+                style={{
+                  padding: "4px 8px",
+                  cursor: "pointer",
+                  border: "1px solid #888",
+                  borderRadius: 4,
+                  background: "#f0f0f0",
+                }}
+              >
+                Logout
+              </button>
+            </>
+          ) : (
+            <>
+              <Link href="/auth/login" style={{ marginRight: 10 }}>
+                Login
+              </Link>
+              <Link href="/auth/register">Register</Link>
+            </>
+          )}
+        </div>
+      </nav>
+
+      {/* Logout confirmation modal */}
+      <Modal
+        isOpen={isModalOpen}
+        title="Confirm Logout"
+        message="Are you sure you want to logout?"
+        onConfirm={confirmLogout}
+        onCancel={cancelLogout}
+      />
+    </>
   );
 }

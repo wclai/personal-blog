@@ -1,3 +1,4 @@
+// src/pages/auth/login.tsx
 import { useState } from "react";
 import { useRouter } from "next/router";
 import { useAuth } from "../../context/AuthContext";
@@ -12,66 +13,79 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
-
-    try {
-      const res = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-
-      if (!res.ok) throw new Error("Invalid credentials");
-
-      const data = await res.json();
-      login(data.user);
+    const success = await login(email, password);
+    if (success) {
       router.push("/dashboard");
-    } catch (err: any) {
-      setError(err.message || "Login failed");
+    } else {
+      setError("Invalid credentials");
     }
   };
 
   return (
-    <div className="min-h-screen flex flex-col justify-center items-center bg-gray-100">
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white p-8 shadow-md rounded-lg w-96"
-      >
-        <h1 className="text-2xl font-bold mb-6 text-center">Login</h1>
+    <div
+      style={{
+        maxWidth: 400,
+        margin: "2rem auto",
+        padding: "2rem",
+        border: "1px solid #ccc",
+        borderRadius: 8,
+        boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
+      }}
+    >
+      <h2 style={{ textAlign: "center", marginBottom: "1.5rem" }}>Login</h2>
 
-        {error && <p className="text-red-500 mb-4 text-center">{error}</p>}
+      {error && (
+        <p
+          style={{
+            color: "red",
+            marginBottom: "1rem",
+            textAlign: "center",
+          }}
+        >
+          {error}
+        </p>
+      )}
 
-        <label className="block mb-2 font-semibold">Email</label>
+      <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column" }}>
+        <label style={{ marginBottom: 5 }}>Email</label>
         <input
           type="email"
-          className="w-full border p-2 rounded mb-4"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          required
+          style={{
+            padding: "8px",
+            marginBottom: "1rem",
+            border: "1px solid #ccc",
+            borderRadius: 4,
+          }}
         />
 
-        <label className="block mb-2 font-semibold">Password</label>
+        <label style={{ marginBottom: 5 }}>Password</label>
         <input
           type="password"
-          className="w-full border p-2 rounded mb-4"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          required
+          style={{
+            padding: "8px",
+            marginBottom: "1.5rem",
+            border: "1px solid #ccc",
+            borderRadius: 4,
+          }}
         />
 
         <button
           type="submit"
-          className="bg-blue-600 text-white py-2 px-4 rounded w-full hover:bg-blue-700"
+          style={{
+            padding: "10px",
+            backgroundColor: "#4f46e5",
+            color: "white",
+            border: "none",
+            borderRadius: 4,
+            cursor: "pointer",
+          }}
         >
           Login
         </button>
-
-        <p className="mt-4 text-center text-sm">
-          Don’t have an account?{" "}
-          <a href="/auth/register" className="text-blue-600 hover:underline">
-            Register
-          </a>
-        </p>
       </form>
     </div>
   );
