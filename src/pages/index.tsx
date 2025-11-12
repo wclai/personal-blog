@@ -17,7 +17,7 @@ export default function HomePage() {
       >
         <div
           style={{
-            width: 500,
+            width: 800,
             padding: "2rem",
             border: "1px solid #ccc",
             borderRadius: 8,
@@ -31,7 +31,7 @@ export default function HomePage() {
           {user ? (
             <p>Logged in as: {user.name || user.email}</p>
           ) : (
-            <p>Please login or register to access your dashboard and portfolio.</p>
+            <p>Please <a href="/auth/login">login</a> or <a href="/auth/register">register</a> to access your dashboard and portfolio.</p>
           )}
         </div>
       </div>

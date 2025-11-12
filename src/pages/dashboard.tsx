@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 // Remove: import NavBar from "../components/NavBar";
+import ChangePasswordForm from "../components/ChangePasswordForm";
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -66,6 +67,10 @@ export default function Dashboard() {
         </p>
 
         {loading && <p>Loading your data...</p>}
+        
+        <p style={{ marginTop: "1rem" }}></p>
+        <ChangePasswordForm />
+        
       </div>
     </div>
   );

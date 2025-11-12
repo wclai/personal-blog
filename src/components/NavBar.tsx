@@ -35,6 +35,9 @@ export default function NavBar() {
           <Link href="/" style={{ marginRight: 15 }}>
             Home
           </Link>
+          <Link href="/dashboard" style={{ marginRight: 15 }}>
+            Dashboard
+          </Link>
           <Link href="/portfolio" style={{ marginRight: 15 }}>
             Portfolio
           </Link>

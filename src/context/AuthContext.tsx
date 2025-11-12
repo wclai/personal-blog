@@ -93,6 +93,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
+async function changePassword(currentPassword: string, newPassword: string) {
+  const res = await fetch("/api/auth/change-password", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ currentPassword, newPassword }),
+  });
+
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || "Failed to change password");
+  return data;
+}
+
 export const useAuth = () => {
   const ctx = useContext(AuthContext);
   if (!ctx) throw new Error("useAuth must be used inside AuthProvider");
