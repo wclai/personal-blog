@@ -4,9 +4,9 @@ import { useAuth } from "../context/AuthContext";
 import Modal from "./Modal";
 
 export default function NavBar() {
-  const { user, logout } = useAuth();
+  const { user, logout, loading } = useAuth();
   const [isModalOpen, setModalOpen] = useState(false);
-
+  
   const handleLogout = () => {
     setModalOpen(true);
   };
@@ -41,6 +41,11 @@ export default function NavBar() {
           <Link href="/portfolio" style={{ marginRight: 15 }}>
             Portfolio
           </Link>
+          {user?.role === "admin" && (
+            <Link href="/profiles" style={{ marginRight: 15 }}>
+              Admin
+            </Link>
+          )}
           <Link href="/blog" style={{ marginRight: 15 }}>
             Blog
           </Link>
@@ -48,32 +53,33 @@ export default function NavBar() {
 
         {/* Right side: login info or login/register */}
         <div>
-          {user ? (
-            <>
-              <span style={{ marginRight: 10 }}>
-                Hi, {user.name || user.email}
-              </span>
-              <button
-                onClick={handleLogout}
-                style={{
-                  padding: "4px 8px",
-                  cursor: "pointer",
-                  border: "1px solid #888",
-                  borderRadius: 4,
-                  background: "#f0f0f0",
-                }}
-              >
-                Logout
-              </button>
-            </>
-          ) : (
-            <>
-              <Link href="/auth/login" style={{ marginRight: 10 }}>
-                Login
-              </Link>
-              <Link href="/auth/register">Register</Link>
-            </>
-          )}
+          {loading ? (
+            <span>Checking auth...</span> 
+          ) : user ? (
+              <>
+                <span style={{ marginRight: 10 }}>
+                  Hi, {user.name || user.email}
+                </span>
+                <button
+                  onClick={handleLogout}
+                  style={{
+                    padding: "4px 8px",
+                    cursor: "pointer",
+                    border: "1px solid #888",
+                    borderRadius: 4,
+                    background: "#f0f0f0",
+                  }}
+                >
+                  Logout
+                </button>
+              </>
+            ) : (
+              <>
+                <Link href="/auth/login" style={{ marginRight: 10 }}>Login</Link>
+                <Link href="/auth/register">Register</Link>
+              </>
+            )
+          }
         </div>
       </nav>
 

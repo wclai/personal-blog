@@ -27,19 +27,34 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const res = await fetch("/api/auth/me");
-        if (res.ok) {
-          const data = await res.json();
-          setUser(data.user);
-        } else {
+        const res = await fetch("/api/auth/me", { credentials: "include" });
+        if (res.status === 401) {
+          // Not logged in — normal for public visitors
           setUser(null);
+          setLoading(false);
+          return;
         }
-      } catch {
+        if (!res.ok) {
+          console.warn("Unexpected auth response:", res.status);
+          setUser(null);
+          return;
+        }
+        const data = await res.json();
+        // Make sure data is valid
+        /*if (!data || !data.id) {
+          setUser(null);
+        } else {
+          setUser(data); // only set if valid
+        }*/
+        setUser(data);  // data is either user or null 
+      } catch (err) {
+        console.warn("Auth check skipped (visitor mode).");
         setUser(null);
       } finally {
         setLoading(false);
       }
     };
+
     fetchUser();
   }, []);
 
