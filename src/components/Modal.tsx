@@ -44,11 +44,13 @@ export default function Modal({ isOpen, title, message, onConfirm, onCancel }: M
           <button
             onClick={onCancel}
             style={{
-              padding: "8px 16px",
+              padding: "8px 14px",
+              fontSize: 14,
               borderRadius: 4,
-              border: "1px solid #888",
-              background: "#f0f0f0",
+              border: "1px solid #ccc",
+              background: "#f5f5f5",
               cursor: "pointer",
+              transition: "background 0.2s, border-color 0.2s",
             }}
           >
             Cancel
@@ -56,12 +58,13 @@ export default function Modal({ isOpen, title, message, onConfirm, onCancel }: M
           <button
             onClick={onConfirm}
             style={{
-              padding: "8px 16px",
-              borderRadius: 4,
-              border: "none",
-              background: "#4f46e5",
-              color: "white",
-              cursor: "pointer",
+                padding: "8px 14px",
+                fontSize: 14,
+                borderRadius: 4,
+                border: "1px solid #ccc",
+                background: "#4f46e5",
+                cursor: "pointer",
+                transition: "background 0.2s, border-color 0.2s",
             }}
           >
             Logout

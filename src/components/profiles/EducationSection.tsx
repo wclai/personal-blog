@@ -1,6 +1,6 @@
-
-// src/components/profiles/EducationSection.tsx
 import { useState, useEffect, useRef } from "react";
+import MonthPicker from "./MonthPicker";
+import { labelStyle, inputStyle, sectionBox, buttonRow } from "../../styles/globalStyle";
 
 /* -----------------------------
    TypeScript Types
@@ -8,7 +8,7 @@ import { useState, useEffect, useRef } from "react";
 
 export interface EducationRow {
   id: number | null;
-  profile_id?: number; // not used in UI but exists in DB
+  profile_id?: number;
   institution: string;
   degree: string;
   field_of_study: string;
@@ -18,7 +18,7 @@ export interface EducationRow {
   location: string;
   created_at?: string;
   updated_at?: string;
-  _deleted?: boolean; // local UI flag only
+  _deleted?: boolean;
 }
 
 interface Props {
@@ -38,102 +38,80 @@ export default function EducationSection({ initialRows, onChange }: Props) {
   const [rows, setRows] = useState<EducationRow[]>([]);
 
   /* Load initial DB rows */
-    useEffect(() => {
-    if (initialRows) {
-      // Convert dates to "YYYY-MM" for month inputs
-      const normalized = initialRows.map(r => ({
-        ...r,
-        start_month: r.start_month ? r.start_month.slice(0, 7) : "",
-        end_month: r.end_month ? r.end_month.slice(0, 7) : "",
-      }));
-      setRows(normalized);
-    }
+  useEffect(() => {
+    if (!initialRows) return;
+
+    const normalized = initialRows.map(r => ({
+      ...r,
+      start_month: r.start_month ? r.start_month.slice(0, 7) : "",
+      end_month: r.end_month ? r.end_month.slice(0, 7) : "",
+    }));
+
+    setRows(normalized);
   }, [initialRows]);
 
-  /* -----------------------------
-     Add Row
-  ------------------------------ */
+  /* Add */
   const addRow = () => {
-    const newRow: EducationRow = {
-      id: null,
-      institution: "",
-      degree: "",
-      field_of_study: "",
-      start_month: "",
-      end_month: "",
-      remark: "",
-      location: "",
-    };
-    setRows([...rows, newRow]);
+    setRows([
+      ...rows,
+      {
+        id: null,
+        institution: "",
+        degree: "",
+        field_of_study: "",
+        start_month: "",
+        end_month: "",
+        remark: "",
+        location: "",
+      },
+    ]);
   };
 
-  /* -----------------------------
-     Remove Row
-  ------------------------------ */
+  /* Remove */
   const removeRow = (index: number) => {
     const row = rows[index];
 
     if (row.id === null) {
-      // Newly added row → delete entirely
       setRows(rows.filter((_, i) => i !== index));
     } else {
-      // Existing DB row → mark deleted
-      setRows(
-        rows.map((r, i) =>
-          i === index ? { ...r, _deleted: true } : r
-        )
-      );
+      setRows(rows.map((r, i) => (i === index ? { ...r, _deleted: true } : r)));
     }
   };
 
-  /* -----------------------------
-     Handle Field Change
-  ------------------------------ */
+  /* Update Field */
   const updateField = (index: number, field: keyof EducationRow, value: string) => {
-    const updated = [...rows];
-    updated[index] = { ...updated[index], [field]: value };
-    setRows(updated);
+    const next = [...rows];
+    next[index] = { ...next[index], [field]: value };
+    setRows(next);
   };
 
-  /* -----------------------------
-     Validation
-  ------------------------------ */
+  /* Validation */
   const validateRows = () => {
-    const visibleRows = rows.filter((r) => !r._deleted);
-
-    for (const r of visibleRows) {
-      if (
-        !r.institution ||
-        !r.degree ||
-        !r.field_of_study ||
-        !r.start_month ||
-        !r.end_month ||
-        !r.location
-      ) {
-        return false;
-      }
-    }
-    return true;
+    const visible = rows.filter(r => !r._deleted);
+    return visible.every(
+      r =>
+        r.institution &&
+        r.degree &&
+        r.field_of_study &&
+        r.start_month &&
+        r.end_month &&
+        r.location
+    );
   };
 
-   /* -----------------------------
-     Emit Changes to Parent
-  ------------------------------ */
-
+  /* Emit changes */
   const hasMounted = useRef(false);
 
   useEffect(() => {
     if (!onChange) return;
-
-    // Prevent firing on initial load → avoids infinite loop
     if (!hasMounted.current) {
       hasMounted.current = true;
       return;
     }
 
     const upserts = rows
-      .filter((r) => !r._deleted)
-      .map((r) => ({
+      .filter(r => !r._deleted)
+      .map(r => ({
         id: r.id,
         institution: r.institution,
         degree: r.degree,
@@ -145,114 +123,142 @@ export default function EducationSection({ initialRows, onChange }: Props) {
       }));
 
     const deleteIds = rows
-      .filter((r) => r._deleted && r.id !== null)
-      .map((r) => r.id!) as number[];
+      .filter(r => r._deleted && r.id !== null)
+      .map(r => r.id!) as number[];
 
-    onChange({
-      upserts,
-      deleteIds,
-      isValid: validateRows(),
-    });
+    onChange({ upserts, deleteIds, isValid: validateRows() });
   }, [rows]);
-
 
   /* -----------------------------
      Render
   ------------------------------ */
 
   return (
-    <div className="border p-4 rounded-lg mt-6">
-      <h2 className="text-lg font-semibold mb-3">Education</h2>
+    <div style={{ ...sectionBox }}>
+      <h2 style={{ fontSize: 18, fontWeight: 600, marginBottom: 12 }}>Education</h2>
 
-      <div className="space-y-4">
+      <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
         {rows
-          .filter((r) => !r._deleted)
+          .filter(r => !r._deleted)
           .map((row, index) => (
-            <div key={index} className="border p-3 rounded-md bg-gray-50 space-y-2">
-              <div className="flex justify-between items-center">
-                <div className="font-medium">Record #{index + 1}</div>
+            <div
+              key={index}
+              style={{
+                border: "1px solid #ddd",
+                borderRadius: 6,
+                padding: 16,
+                background: "white",
+                display: "flex",
+                flexDirection: "column",
+                gap: 16,
+              }}
+            >
+              {/* Header */}
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
+                <div style={{ fontWeight: 600 }}>Record #{index + 1}</div>
+
                 <button
                   type="button"
-                  className="text-red-600 font-bold"
+                  style={{
+                    border: "none",
+                    background: "transparent",
+                    color: "#cc0000",
+                    fontSize: 20,
+                    cursor: "pointer",
+                  }}
                   onClick={() => removeRow(index)}
                 >
-                  –
+                  ✕
                 </button>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {/* Institution */}
+              {/* 2-column form layout */}
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr",
+                  gap: 16,
+                }}
+              >
                 <InputField
                   label="Institution"
                   value={row.institution}
-                  onChange={(v) => updateField(index, "institution", v)}
+                  onChange={v => updateField(index, "institution", v)}
                 />
 
-                {/* Degree */}
-                <InputField
-                  label="Degree"
-                  value={row.degree}
-                  onChange={(v) => updateField(index, "degree", v)}
-                />
-
-                {/* Field of Study */}
-                <InputField
-                  label="Field of Study"
-                  value={row.field_of_study}
-                  onChange={(v) => updateField(index, "field_of_study", v)}
-                />
-
-                {/* Location */}
                 <InputField
                   label="Location"
                   value={row.location}
-                  onChange={(v) => updateField(index, "location", v)}
+                  onChange={v => updateField(index, "location", v)}
                 />
 
-                {/* Start Month */}
                 <InputField
+                  label="Degree"
+                  value={row.degree}
+                  onChange={v => updateField(index, "degree", v)}
+                />
+
+                <InputField
+                  label="Field of Study"
+                  value={row.field_of_study}
+                  onChange={v => updateField(index, "field_of_study", v)}
+                />
+
+                <MonthPicker
                   label="Start Month"
-                  type="month"
                   value={row.start_month}
-                  onChange={(v) => updateField(index, "start_month", v)}
+                  onChange={v => updateField(index, "start_month", v)}
                 />
 
-                {/* End Month */}
-                <InputField
+                <MonthPicker
                   label="End Month"
-                  type="month"
                   value={row.end_month}
-                  onChange={(v) => updateField(index, "end_month", v)}
+                  onChange={v => updateField(index, "end_month", v)}
                 />
               </div>
 
               {/* Remark */}
-              <div>
-                <label className="text-sm">Remark</label>
+              <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                <label style={labelStyle}>Remark</label>
                 <textarea
-                  className="border p-2 w-full"
+                  style={{ ...inputStyle, resize: "vertical", minHeight: 60 }}
                   value={row.remark}
-                  onChange={(e) => updateField(index, "remark", e.target.value)}
+                  onChange={e => updateField(index, "remark", e.target.value)}
                 />
               </div>
             </div>
           ))}
       </div>
 
-      {/* ADD BUTTON */}
-      <button
-        type="button"
-        className="mt-4 px-3 py-1 bg-blue-600 text-white rounded"
-        onClick={addRow}
-      >
-        + Add Education
-      </button>
+      {/* Add Button */}
+      <div style={buttonRow}>
+        <button
+          type="button"
+          style={{
+            padding: "10px 14px",
+            background: "#2a67d0",
+            color: "white",
+            borderRadius: 4,
+            border: "none",
+            cursor: "pointer",
+          }}
+          onClick={addRow}
+        >
+          + Add Education
+        </button>
+      </div>
     </div>
   );
 }
 
 /* -----------------------------
-   Reusable Field Component
+   Reusable InputField
 ------------------------------ */
 
 function InputField({
@@ -267,13 +273,13 @@ function InputField({
   onChange: (value: string) => void;
 }) {
   return (
-    <div>
-      <label className="text-sm">{label}</label>
+    <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+      <label style={labelStyle}>{label}</label>
       <input
         type={type}
-        className="border p-2 w-full"
+        style={inputStyle}
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={e => onChange(e.target.value)}
       />
     </div>
   );

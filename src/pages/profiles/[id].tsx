@@ -1,13 +1,68 @@
 // src/pages/profiles/[id].tsx
-
 "use client";
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { useAuth } from "../../context/AuthContext";
 import EducationSection from "../../components/profiles/EducationSection";
+//import Modal from "../../components/Modal";
+import { labelStyle , inputStyle , sectionBox , buttonRow , buttonStyle, confirmButtonStyle } from "../../styles/globalStyle";
 
-// ---------- Types ----------
+/* ---------- Modal Component ---------- */
+function Modal({
+  open,
+  title,
+  message,
+  onClose,
+  onConfirm,
+}: {
+  open: boolean;
+  title: string;
+  message: string;
+  onClose: () => void;
+  onConfirm?: () => void;
+}) {
+  if (!open) return null;
+
+  return (
+    <div
+      style={{
+        position: "fixed",
+        inset: 0,
+        background: "rgba(0,0,0,0.4)",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        zIndex: 1000,
+      }}
+    >
+      <div
+        style={{
+          background: "white",
+          padding: 20,
+          borderRadius: 6,
+          width: 360,
+        }}
+      >
+        <h3>{title}</h3>
+        <p style={{ marginTop: 10 }}>{message}</p>
+
+        <div style={{ marginTop: 20, display: "flex", justifyContent: "flex-end", gap: 10 }}>
+          <button style= {buttonStyle} onClick={onClose}>
+            Cancel
+          </button>
+          {onConfirm && (
+            <button onClick={onConfirm} style={confirmButtonStyle}>
+              OK
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ---------- Types ---------- */
 interface ProfileMaster {
   id: number;
   pf_name: string;
@@ -44,7 +99,7 @@ interface EducationChange {
   isValid: boolean;
 }
 
-// ---------- Main Component ----------
+/* ---------- Main Component ---------- */
 export default function ProfileEditPage() {
   const router = useRouter();
   const { id } = router.query;
@@ -56,7 +111,6 @@ export default function ProfileEditPage() {
   const [master, setMaster] = useState<ProfileMaster | null>(null);
   const [education, setEducation] = useState<PfEducation[]>([]);
 
-  // Payload from child components (CRUD packet)
   const [educationPayload, setEducationPayload] = useState<EducationChange>({
     upserts: [],
     deleteIds: [],
@@ -65,7 +119,16 @@ export default function ProfileEditPage() {
 
   const [saving, setSaving] = useState(false);
 
-  // ---------- Auth Check ----------
+  // Modal states
+  const [modal, setModal] = useState<{ open: boolean; title: string; message: string }>({
+    open: false,
+    title: "",
+    message: "",
+  });
+
+  const [confirmReturn, setConfirmReturn] = useState(false);
+
+  /* ---------- Auth Check ---------- */
   useEffect(() => {
     if (!loading) {
       setIsAdmin(user?.role === "admin");
@@ -73,7 +136,7 @@ export default function ProfileEditPage() {
     }
   }, [loading, user]);
 
-  // ---------- Fetch Profile ----------
+  /* ---------- Fetch Profile ---------- */
   useEffect(() => {
     if (!id) return;
 
@@ -85,28 +148,39 @@ export default function ProfileEditPage() {
         const data = await res.json();
 
         setMaster(data.master);
-        setEducation(data.education); // ONLY set once
+        setEducation(data.education);
       } catch (err) {
         console.error(err);
-        alert("Failed to fetch profile data");
+        setModal({
+          open: true,
+          title: "Error",
+          message: "Failed to fetch profile data.",
+        });
       }
     }
 
     fetchProfile();
   }, [id]);
 
-  // ---------- Save Handler ----------
+  /* ---------- Save Handler ---------- */
   const handleSave = async () => {
     if (!master) return;
-  // Frontend validation: basic required fields check
+
     if (!master.name || !master.pf_name) {
-      alert("PF Name and Name are required");
+      setModal({
+        open: true,
+        title: "Validation",
+        message: "PF Name and Name are required.",
+      });
       return;
     }
 
-    // Optional: also check child validity
     if (!educationPayload.isValid) {
-      alert("Please check Education fields.");
+      setModal({
+        open: true,
+        title: "Validation",
+        message: "Please check Education fields.",
+      });
       return;
     }
 
@@ -117,22 +191,39 @@ export default function ProfileEditPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           master,
-          education: educationPayload, // send CRUD packet
+          education: educationPayload,
         }),
       });
 
       if (!res.ok) throw new Error("Save failed");
 
-      alert("Profile saved successfully");
+      setModal({
+        open: true,
+        title: "Success",
+        message: "Profile saved successfully.",
+      });
     } catch (err) {
       console.error(err);
-      alert("Error saving profile");
+      setModal({
+        open: true,
+        title: "Error",
+        message: "Failed to save profile.",
+      });
     } finally {
       setSaving(false);
     }
   };
 
-  // ---------- UI ----------
+  /* ---------- Return Handler ---------- */
+  const handleReturn = () => {
+    setConfirmReturn(true);
+  };
+
+  const confirmReturnAction = () => {
+    router.push("/profiles");
+  };
+
+  /* ---------- UI ---------- */
   if (authLoading) return <p>Checking auth...</p>;
   if (!isAdmin) return <p>Unauthorized</p>;
   if (!master) return <p>Loading profile...</p>;
@@ -142,61 +233,108 @@ export default function ProfileEditPage() {
       <h1>Edit Profile</h1>
 
       {/* ---------- Master Section ---------- */}
-      <section style={{ marginBottom: 30 }}>
-        <h2>Profile Master</h2>
-        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-          <label>
-            PF Name: <input value={master.pf_name} onChange={e => setMaster({ ...master, pf_name: e.target.value })} />
+      <section style={sectionBox}>
+        <h2>Profile</h2>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+          <label style={labelStyle}>
+            Profile Name
+            <input style={inputStyle} value={master.pf_name} onChange={(e) => setMaster({ ...master, pf_name: e.target.value })} />
           </label>
-          <label>
-            Name: <input value={master.name} onChange={e => setMaster({ ...master, name: e.target.value })} />
+
+          <label style={labelStyle}>
+            Full Name
+            <input style={inputStyle} value={master.name} onChange={(e) => setMaster({ ...master, name: e.target.value })} />
           </label>
-          <label>
-            Job Title: <input value={master.job_title} onChange={e => setMaster({ ...master, job_title: e.target.value })} />
+
+          <label style={labelStyle}>
+            Job Title
+            <input style={inputStyle} value={master.job_title} onChange={(e) => setMaster({ ...master, job_title: e.target.value })} />
           </label>
-          <label>
-            Tagline: <input value={master.tagline} onChange={e => setMaster({ ...master, tagline: e.target.value })} />
+
+          <label style={labelStyle}>
+            Tagline
+            <input style={inputStyle} value={master.tagline} onChange={(e) => setMaster({ ...master, tagline: e.target.value })} />
           </label>
-          <label>
-            Location: <input value={master.location} onChange={e => setMaster({ ...master, location: e.target.value })} />
+
+          <label style={labelStyle}>
+            Location
+            <input style={inputStyle} value={master.location} onChange={(e) => setMaster({ ...master, location: e.target.value })} />
           </label>
-          <label>
-            Introduction: <textarea value={master.introduction} onChange={e => setMaster({ ...master, introduction: e.target.value })} />
+
+          <label style={labelStyle}>
+            Introduction
+            <textarea
+              style={{ ...inputStyle, height: 80 }}
+              value={master.introduction}
+              onChange={(e) => setMaster({ ...master, introduction: e.target.value })}
+            />
           </label>
-          <label>
-            Photo URL: <input value={master.photo_path} onChange={e => setMaster({ ...master, photo_path: e.target.value })} />
+
+          <label style={labelStyle}>
+            Photo URL
+            <input style={inputStyle} value={master.photo_path} onChange={(e) => setMaster({ ...master, photo_path: e.target.value })} />
           </label>
-          <label>
-            Public: <input type="checkbox" checked={master.is_public} onChange={e => setMaster({ ...master, is_public: e.target.checked })} />
+
+          <label style={labelStyle}>
+            Public
+            <input
+              type="checkbox"
+              checked={master.is_public}
+              onChange={(e) => setMaster({ ...master, is_public: e.target.checked })}
+            />
           </label>
         </div>
 
         {/* Contact */}
         <div style={{ marginTop: 20 }}>
           <h3>Contact Information</h3>
-          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            <label>
-              Telephone: <input value={master.contact.telephone} onChange={e => setMaster({ ...master, contact: { ...master.contact, telephone: e.target.value } })} />
+
+          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            <label style={labelStyle}>
+              Telephone
+              <input
+                style={inputStyle}
+                value={master.contact.telephone}
+                onChange={(e) => setMaster({ ...master, contact: { ...master.contact, telephone: e.target.value } })}
+              />
             </label>
-            <label>
-              Mobile: <input value={master.contact.mobile} onChange={e => setMaster({ ...master, contact: { ...master.contact, mobile: e.target.value } })} />
+
+            <label style={labelStyle}>
+              Mobile
+              <input
+                style={inputStyle}
+                value={master.contact.mobile}
+                onChange={(e) => setMaster({ ...master, contact: { ...master.contact, mobile: e.target.value } })}
+              />
             </label>
-            <label>
-              Email: <input value={master.contact.email} onChange={e => setMaster({ ...master, contact: { ...master.contact, email: e.target.value } })} />
+
+            <label style={labelStyle}>
+              Email
+              <input
+                style={inputStyle}
+                value={master.contact.email}
+                onChange={(e) => setMaster({ ...master, contact: { ...master.contact, email: e.target.value } })}
+              />
             </label>
-            <label>
-              Address: <input value={master.contact.address} onChange={e => setMaster({ ...master, contact: { ...master.contact, address: e.target.value } })} />
+
+            <label style={labelStyle}>
+              Address
+              <input
+                style={inputStyle}
+                value={master.contact.address}
+                onChange={(e) => setMaster({ ...master, contact: { ...master.contact, address: e.target.value } })}
+              />
             </label>
           </div>
         </div>
       </section>
 
       {/* ---------- Education Section ---------- */}
-      <section style={{ marginBottom: 30 }}>
+      <section style={sectionBox}>
         <EducationSection
-          initialRows={education} // stable, only from backend
+          initialRows={education}
           onChange={(packet) => {
-            // Only store CRUD packet
             const normalized = {
               ...packet,
               upserts: packet.upserts.map((r) => ({
@@ -209,13 +347,31 @@ export default function ProfileEditPage() {
         />
       </section>
 
-      {/* ---------- Save ---------- */}
-      <div style={{ marginTop: 20, display: "flex", gap: 10 }}>
-        <button onClick={handleSave} disabled={saving}>
+      {/* ---------- Buttons ---------- */}
+      <div style={buttonRow}>
+        <button style={buttonStyle} onClick={handleSave} disabled={saving}>
           Save
         </button>
-        <button onClick={() => router.push("/profiles")}>Return</button>
+        <button style={buttonStyle} onClick={handleReturn}>
+          Return
+        </button>
       </div>
+
+      {/* ---------- Modals ---------- */}
+      <Modal
+        open={modal.open}
+        title={modal.title}
+        message={modal.message}
+        onClose={() => setModal({ ...modal, open: false })}
+      />
+
+      <Modal
+        open={confirmReturn}
+        title="Confirm Return"
+        message="Please remember to save before leaving. Are you sure you want to return?"
+        onClose={() => setConfirmReturn(false)}
+        onConfirm={confirmReturnAction}
+      />
     </div>
   );
 }
