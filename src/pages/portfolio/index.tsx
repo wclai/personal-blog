@@ -57,21 +57,19 @@ export default function PortfolioPage() {
       {/* --- selected profile --- */}
       {selectedProfile && (
         <>
-          <h1>{selectedProfile.name}</h1>
-          <h3>{selectedProfile.job_title}</h3>
-          <p>{selectedProfile.location}</p>
-
-          {selectedProfile.photo_path && (
+          <p>{selectedProfile.photo_path && (
             <img
               src={selectedProfile.photo_path}
               alt={selectedProfile.name}
               style={{ maxWidth: 200 }}
             />
-          )}
-
+          )}</p>
+          <h1>{selectedProfile.name}</h1>
+          <h3>{selectedProfile.job_title}</h3>
           {selectedProfile.tagline && (
             <p>{selectedProfile.tagline}</p>
           )}
+          <p>{selectedProfile.location}</p>
         </>
       )}
     </div>

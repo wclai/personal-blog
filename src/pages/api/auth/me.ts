@@ -41,8 +41,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(200).json(null);
     }
 
+    /*
     const user = rows[0];
     console.log("ME API → Returning user:", user);
+    */
 
     // return user object directly
     return res.status(200).json(rows[0]);
