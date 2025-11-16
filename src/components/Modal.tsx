@@ -1,76 +1,102 @@
+
 // src/components/Modal.tsx
 import React from "react";
+import { buttonStyle } from "../styles/globalStyle";
 
-interface ModalProps {
-  isOpen: boolean;
-  title?: string;
-  message: string;
-  onConfirm: () => void;
-  onCancel: () => void;
+interface ModalAction {
+  label: string;
+  onClick: () => void;
+  style?: React.CSSProperties; // allow per-button styling
 }
 
-export default function Modal({ isOpen, title, message, onConfirm, onCancel }: ModalProps) {
-  if (!isOpen) return null;
+export function Modal({
+  open,
+  children,
+  actions = [],
+}: {
+  open: boolean;
+  children: React.ReactNode;
+  actions?: ModalAction[];
+}) {
+  if (!open) return null;
 
   return (
     <div
       style={{
         position: "fixed",
-        top: 0,
-        left: 0,
-        width: "100vw",
-        height: "100vh",
-        backgroundColor: "rgba(0,0,0,0.5)",
+        inset: 0,
+        background: "rgba(0,0,0,0.4)",
         display: "flex",
-        alignItems: "center",
         justifyContent: "center",
+        alignItems: "center",
         zIndex: 1000,
       }}
     >
       <div
         style={{
           background: "white",
-          padding: "1.5rem",
-          borderRadius: 8,
-          maxWidth: 400,
-          width: "90%",
-          textAlign: "center",
-          boxShadow: "0 2px 10px rgba(0,0,0,0.2)",
+          padding: 20,
+          borderRadius: 6,
+          width: 360,
         }}
       >
-        {title && <h3 style={{ marginBottom: "1rem" }}>{title}</h3>}
-        <p style={{ marginBottom: "1.5rem" }}>{message}</p>
-        <div style={{ display: "flex", justifyContent: "space-around" }}>
-          <button
-            onClick={onCancel}
+        {children}
+
+        {/* --- Action Buttons Row --- */}
+        {actions.length > 0 && (
+          <div
             style={{
-              padding: "8px 14px",
-              fontSize: 14,
-              borderRadius: 4,
-              border: "1px solid #ccc",
-              background: "#f5f5f5",
-              cursor: "pointer",
-              transition: "background 0.2s, border-color 0.2s",
+              marginTop: 20,
+              display: "flex",
+              justifyContent: "flex-end",
+              gap: 10,
             }}
           >
-            Cancel
-          </button>
-          <button
-            onClick={onConfirm}
-            style={{
-                padding: "8px 14px",
-                fontSize: 14,
-                borderRadius: 4,
-                border: "1px solid #ccc",
-                background: "#4f46e5",
-                cursor: "pointer",
-                transition: "background 0.2s, border-color 0.2s",
-            }}
-          >
-            Logout
-          </button>
-        </div>
+            {actions.map((btn, i) => (
+              <button
+                key={i}
+                style={{ ...buttonStyle, ...btn.style }}
+                onClick={btn.onClick}
+              >
+                {btn.label}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
     </div>
+  );
+}
+
+export function ConfirmModal({
+  open,
+  title,
+  message,
+  onClose,
+  onConfirm,
+  labelClose = "Cancel",
+  labelConfirm = "OK",
+}: {
+  open: boolean;
+  title: string;
+  message: string;
+  onClose: () => void;
+  onConfirm?: () => void;
+  labelClose?: string;
+  labelConfirm?: string;
+}) {
+  return (
+    <Modal
+      open={open}
+      actions={[
+        { label: labelClose, onClick: onClose },
+        ...(onConfirm
+          ? [{ label: labelConfirm, onClick: onConfirm, style: { color: "#f5f5f5", background: "#4f46e5" } }]
+          : []),
+      ]}
+    >
+      <h3>{title}</h3>
+      <p style={{ marginTop: 10 }}>{message}</p>
+    </Modal>
   );
 }

@@ -5,62 +5,8 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { useAuth } from "../../context/AuthContext";
 import EducationSection from "../../components/profiles/EducationSection";
-//import Modal from "../../components/Modal";
+import { ConfirmModal } from "../../components/Modal";
 import { labelStyle , inputStyle , sectionBox , buttonRow , buttonStyle, confirmButtonStyle } from "../../styles/globalStyle";
-
-/* ---------- Modal Component ---------- */
-function Modal({
-  open,
-  title,
-  message,
-  onClose,
-  onConfirm,
-}: {
-  open: boolean;
-  title: string;
-  message: string;
-  onClose: () => void;
-  onConfirm?: () => void;
-}) {
-  if (!open) return null;
-
-  return (
-    <div
-      style={{
-        position: "fixed",
-        inset: 0,
-        background: "rgba(0,0,0,0.4)",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        zIndex: 1000,
-      }}
-    >
-      <div
-        style={{
-          background: "white",
-          padding: 20,
-          borderRadius: 6,
-          width: 360,
-        }}
-      >
-        <h3>{title}</h3>
-        <p style={{ marginTop: 10 }}>{message}</p>
-
-        <div style={{ marginTop: 20, display: "flex", justifyContent: "flex-end", gap: 10 }}>
-          <button style= {buttonStyle} onClick={onClose}>
-            Cancel
-          </button>
-          {onConfirm && (
-            <button onClick={onConfirm} style={confirmButtonStyle}>
-              OK
-            </button>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
 
 /* ---------- Types ---------- */
 interface ProfileMaster {
@@ -179,7 +125,7 @@ export default function ProfileEditPage() {
       setModal({
         open: true,
         title: "Validation",
-        message: "Please check Education fields.",
+        message: "Please fill in all Education fields.",
       });
       return;
     }
@@ -358,18 +304,20 @@ export default function ProfileEditPage() {
       </div>
 
       {/* ---------- Modals ---------- */}
-      <Modal
+      <ConfirmModal
         open={modal.open}
         title={modal.title}
         message={modal.message}
         onClose={() => setModal({ ...modal, open: false })}
       />
 
-      <Modal
+      <ConfirmModal
         open={confirmReturn}
         title="Confirm Return"
         message="Please remember to save before leaving. Are you sure you want to return?"
+        labelClose="Cancel"
         onClose={() => setConfirmReturn(false)}
+        labelConfirm="Return"
         onConfirm={confirmReturnAction}
       />
     </div>

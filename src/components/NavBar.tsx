@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
-import Modal from "./Modal";
+import { ConfirmModal } from "./Modal";
 
 export default function NavBar() {
   const { user, logout, loading } = useAuth();
@@ -84,12 +84,14 @@ export default function NavBar() {
       </nav>
 
       {/* Logout confirmation modal */}
-      <Modal
-        isOpen={isModalOpen}
+      <ConfirmModal
+        open={isModalOpen}
         title="Confirm Logout"
         message="Are you sure you want to logout?"
+        labelClose="Cancel"
+        onClose={cancelLogout}
+        labelConfirm="Logout"
         onConfirm={confirmLogout}
-        onCancel={cancelLogout}
       />
     </>
   );

@@ -53,6 +53,7 @@ export const buttonStyle: React.CSSProperties = {
 export const confirmButtonStyle: React.CSSProperties = {
   padding: "8px 14px",
   fontSize: 14,
+  color: "#f5f5f5",
   borderRadius: 4,
   border: "1px solid #ccc",
   background: "#4f46e5",
