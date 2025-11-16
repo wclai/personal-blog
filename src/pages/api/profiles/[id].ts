@@ -1,3 +1,5 @@
+// src/pages/api/profiles/[id].ts
+
 import type { NextApiRequest, NextApiResponse } from "next";
 import { pool } from "../../../lib/db";
 import { applyCrud } from "../../../lib/applyCrud";
@@ -64,6 +66,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       // 2. Profiles table CRUD
       const eduRows = education?.upserts ?? [];
+      const workRows = work?.upserts ?? [];
+
       // Delete rows marked for deletion if any
       if (education?.deleteIds?.length) {
         for (const delId of education.deleteIds) {
@@ -71,6 +75,31 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
       }
 
+      if (work?.deleteIds?.length) {
+        for (const delId of work.deleteIds) {
+          await client.query(`DELETE FROM pf_work_experience WHERE id=$1`, [delId]);
+        }
+      }
+
+      for (const row of eduRows) {
+        if (row.end_month < row.start_month) {
+          return res.status(400).json({
+            error: "End Month must be later or equal to Start Month",
+          });
+        }
+      }
+      
+      for (const row of workRows) {
+        if (!row.is_present && row.end_month && row.start_month) {
+          if (row.end_month < row.start_month) {
+            return res.status(400).json({
+              error: "End Month must be later or equal to Start Month",
+            });
+          }
+        }
+      }
+      
+      // applyCrud      
       const updatedEducation = await applyCrud(
         client,
         "pf_education",
@@ -78,8 +107,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         profileId
       );
 
-      // ---------- 3. Apply Work CRUD safely ----------
-      const workRows = Array.isArray(work) ? work : [];
       const updatedWork = await applyCrud(
         client,
         "pf_work_experience",

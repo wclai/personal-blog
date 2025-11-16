@@ -4,9 +4,11 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { useAuth } from "../../context/AuthContext";
-import EducationSection from "../../components/profiles/EducationSection";
 import { ConfirmModal } from "../../components/Modal";
-import { labelStyle , inputStyle , sectionBox , buttonRow , buttonStyle, confirmButtonStyle } from "../../styles/globalStyle";
+import { labelStyle , inputStyle , sectionBox , buttonRow , buttonStyle, confirmButtonStyle, Red } from "../../styles/globalStyle";
+
+import EducationSection from "../../components/profiles/EducationSection";
+import WorkSection from "../../components/profiles/WorkSection";
 
 /* ---------- Types ---------- */
 interface ProfileMaster {
@@ -30,17 +32,37 @@ interface ProfileMaster {
 interface PfEducation {
   id: number | null;
   profile_id: number;
-  institution: string;
+  institution: string;  
+  location: string;
   degree: string;
   field_of_study: string;
   start_month: string;
   end_month: string;
   remark: string;
-  location: string;
 }
 
 interface EducationChange {
   upserts: PfEducation[];
+  deleteIds: number[];
+  isValid: boolean;
+}
+
+interface PfWork {
+  id: number | null;
+  profile_id: number;
+  company: string;
+  location: string;
+  position: string;
+  description: string;
+  is_present: boolean;
+  start_month: string;
+  end_month: string;
+  remark: string;
+
+}
+
+interface WorkChange {
+  upserts: PfWork[];
   deleteIds: number[];
   isValid: boolean;
 }
@@ -56,8 +78,14 @@ export default function ProfileEditPage() {
 
   const [master, setMaster] = useState<ProfileMaster | null>(null);
   const [education, setEducation] = useState<PfEducation[]>([]);
+  const [work, setWork] = useState<PfWork[]>([]);
 
   const [educationPayload, setEducationPayload] = useState<EducationChange>({
+    upserts: [],
+    deleteIds: [],
+    isValid: true,
+  });
+  const [workPayload, setWorkPayload] = useState<WorkChange>({
     upserts: [],
     deleteIds: [],
     isValid: true,
@@ -95,6 +123,7 @@ export default function ProfileEditPage() {
 
         setMaster(data.master);
         setEducation(data.education);
+        setWork(data.work);
       } catch (err) {
         console.error(err);
         setModal({
@@ -116,18 +145,36 @@ export default function ProfileEditPage() {
       setModal({
         open: true,
         title: "Validation",
-        message: "PF Name and Name are required.",
+        message: "Profile Name and Full Name are required.",
       });
       return;
     }
 
-    if (!educationPayload.isValid) {
+    if (educationPayload.isValid === false ||
+      workPayload.isValid === false
+    ) {
       setModal({
         open: true,
         title: "Validation",
-        message: "Please fill in all Education fields.",
+        message: "Please fill in all mandatory fields.",
       });
       return;
+    }
+
+    for (const row of education) {
+      if (row.start_month && row.end_month < row.start_month) {
+        alert("End Month must be later or equal to Start Month.");
+        return;
+      }
+    }
+
+    for (const row of work) {
+      if (!row.is_present && row.end_month) {
+        if (row.start_month && row.end_month < row.start_month) {
+          alert("End Month must be later or equal to Start Month.");
+          return;
+        }
+      }
     }
 
     setSaving(true);
@@ -138,6 +185,7 @@ export default function ProfileEditPage() {
         body: JSON.stringify({
           master,
           education: educationPayload,
+          work: workPayload,
         }),
       });
 
@@ -181,15 +229,18 @@ export default function ProfileEditPage() {
       {/* ---------- Master Section ---------- */}
       <section style={sectionBox}>
         <h2>Profile</h2>
-
         <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
           <label style={labelStyle}>
-            Profile Name
+            <span style={{ fontStyle: "italic" }}>Mandatory field(s) masked with <span style={{ color: "red", fontWeight: "bold" }}>*</span></span>
+          </label>
+
+          <label style={labelStyle}>
+            <span>Profile Name<span style={{ color: "red", fontWeight: "bold" }}> *</span></span>
             <input style={inputStyle} value={master.pf_name} onChange={(e) => setMaster({ ...master, pf_name: e.target.value })} />
           </label>
 
           <label style={labelStyle}>
-            Full Name
+            <span>Full Name<span style={{ color: "red", fontWeight: "bold" }}> *</span></span>
             <input style={inputStyle} value={master.name} onChange={(e) => setMaster({ ...master, name: e.target.value })} />
           </label>
 
@@ -212,7 +263,7 @@ export default function ProfileEditPage() {
             Introduction
             <textarea
               style={{ ...inputStyle, height: 80 }}
-              value={master.introduction}
+              value={master.introduction ?? ""}
               onChange={(e) => setMaster({ ...master, introduction: e.target.value })}
             />
           </label>
@@ -223,7 +274,7 @@ export default function ProfileEditPage() {
           </label>
 
           <label style={labelStyle}>
-            Public
+            Is public?
             <input
               type="checkbox"
               checked={master.is_public}
@@ -235,8 +286,8 @@ export default function ProfileEditPage() {
         {/* Contact */}
         <div style={{ marginTop: 20 }}>
           <h3>Contact Information</h3>
-
           <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            <span></span>
             <label style={labelStyle}>
               Telephone
               <input
@@ -293,6 +344,27 @@ export default function ProfileEditPage() {
         />
       </section>
 
+      {/* ---------- Work Section ---------- */}
+      <section style={sectionBox}>
+        <WorkSection
+          initialRows={work}
+          onChange={(packet) => {
+            const normalized = {
+              ...packet,
+              upserts: packet.upserts.map((r) => ({
+                ...r,
+                profile_id: Number(id),
+              })),
+            };
+            setWorkPayload(normalized);
+          }}
+        />
+      </section>
+      
+      <label style={labelStyle}>
+        <span style={{ fontStyle: "italic" }}>Mandatory field(s) masked with <span style={{ color: "red", fontWeight: "bold" }}>*</span></span>
+      </label>
+      
       {/* ---------- Buttons ---------- */}
       <div style={buttonRow}>
         <button style={buttonStyle} onClick={handleSave} disabled={saving}>

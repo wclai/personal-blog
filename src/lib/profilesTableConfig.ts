@@ -14,11 +14,12 @@ export const TABLE_COLUMNS: Record<string, string[]> = {
   pf_work_experience: [
     "profile_id",
     "company",
-    "title",
+    "position",
     "start_month",
     "end_month",
     "description",
     "location",
+    "is_present"
   ],
 
   // Add more child tables here

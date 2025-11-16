@@ -45,7 +45,6 @@ export const buttonStyle: React.CSSProperties = {
   background: "#f5f5f5",
   cursor: "pointer",
   transition: "background 0.2s, border-color 0.2s",
-
   /* Prevent text selection flicker */
   userSelect: "none",
 };
@@ -59,7 +58,6 @@ export const confirmButtonStyle: React.CSSProperties = {
   background: "#4f46e5",
   cursor: "pointer",
   transition: "background 0.2s, border-color 0.2s",
-
   /* Prevent text selection flicker */
   userSelect: "none",
 };
@@ -73,3 +71,12 @@ export const buttonDisabledStyle: React.CSSProperties = {
   opacity: 0.5,
   cursor: "not-allowed",
 };
+
+export const Red = ({ children }: { children: React.ReactNode }) => (
+  <span style={{ 
+    color: "red", 
+    fontWeight: "bold", 
+    display: "inline"}}>
+    {children}
+  </span>
+);

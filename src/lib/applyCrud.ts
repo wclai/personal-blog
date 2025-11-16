@@ -2,6 +2,7 @@
 import { TABLE_COLUMNS } from "./profilesTableConfig";
 
 function normalizeDate(value: any) {
+  if (!value) return null; // <-- empty string or undefined/null becomes null
   // Convert "YYYY-MM" to "YYYY-MM-01" for DATE columns
   if (typeof value === "string" && /^\d{4}-\d{2}$/.test(value)) {
     return value + "-01";

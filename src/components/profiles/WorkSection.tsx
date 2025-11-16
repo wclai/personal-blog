@@ -1,3 +1,6 @@
+
+// src/components/profiles/WorkSection.tsx
+
 import { useState, useEffect, useRef } from "react";
 import MonthPicker from "./MonthPicker";
 import { labelStyle, inputStyle, sectionBox, buttonRow } from "../../styles/globalStyle";
@@ -6,15 +9,16 @@ import { labelStyle, inputStyle, sectionBox, buttonRow } from "../../styles/glob
    TypeScript Types
 ------------------------------ */
 
-export interface EducationRow {
+export interface WorkRow {
   id: number | null;
   profile_id?: number;
-  institution: string;
+  company: string;
   location: string;
-  degree: string;
-  field_of_study: string;
+  position: string;
+  is_present: boolean;
   start_month: string;
   end_month: string;
+  description: string;
   remark: string;
   created_at?: string;
   updated_at?: string;
@@ -22,9 +26,9 @@ export interface EducationRow {
 }
 
 interface Props {
-  initialRows: EducationRow[];
+  initialRows: WorkRow[];
   onChange?: (data: {
-    upserts: EducationRow[];
+    upserts: WorkRow[];
     deleteIds: number[];
     isValid: boolean;
   }) => void;
@@ -34,8 +38,8 @@ interface Props {
    Component
 ------------------------------ */
 
-export default function EducationSection({ initialRows, onChange }: Props) {
-  const [rows, setRows] = useState<EducationRow[]>([]);
+export default function WorkSection({ initialRows, onChange }: Props) {
+  const [rows, setRows] = useState<WorkRow[]>([]);
   const [errors, setErrors] = useState<{ [index: number]: string }>({});
 
   /* Load initial DB rows */
@@ -57,12 +61,13 @@ export default function EducationSection({ initialRows, onChange }: Props) {
       ...rows,
       {
         id: null,
-        institution: "",
+        company: "",        
         location: "",
-        degree: "",
-        field_of_study: "",
+        position: "",
+        is_present: false,
         start_month: "",
         end_month: "",
+        description: "",
         remark: "",
       },
     ]);
@@ -80,9 +85,19 @@ export default function EducationSection({ initialRows, onChange }: Props) {
   };
 
   /* Update Field */
-  const updateField = (index: number, field: keyof EducationRow, value: string) => {
+  const updateField = (index: number, field: keyof WorkRow, value: any) => {
     const next = [...rows];
-    next[index] = { ...next[index], [field]: value };
+
+    if (field === "is_present") {
+      next[index] = {
+        ...next[index],
+        is_present: value,
+        end_month: value ? "" : next[index].end_month, // clear end_month if present
+      };
+    } else {
+      next[index] = { ...next[index], [field]: value };
+    }
+
     setRows(next);
   };
 
@@ -91,12 +106,12 @@ export default function EducationSection({ initialRows, onChange }: Props) {
     const visible = rows.filter(r => !r._deleted);
     return visible.every(
       r =>
-        r.institution &&
+        r.company &&
         r.location &&
-        r.degree &&
-        r.field_of_study &&
+        r.position &&
         r.start_month &&
-        r.end_month         
+        (!r.is_present ? r.end_month : true) && // skip end_month check if is_present      
+        r.description
     );
   };
 
@@ -113,8 +128,10 @@ export default function EducationSection({ initialRows, onChange }: Props) {
     const newErrors: { [index: number]: string } = {};
 
     rows.forEach((r, i) => {
-      if (r.end_month < r.start_month) {
-        newErrors[i] = "End Month must be later or equal to Start Month.";
+      if (!r._deleted && !r.is_present && r.start_month && r.end_month) {
+        if (r.end_month < r.start_month) {
+          newErrors[i] = "End Month must be later or equal to Start Month.";
+        }
       }
     });
 
@@ -124,12 +141,13 @@ export default function EducationSection({ initialRows, onChange }: Props) {
       .filter(r => !r._deleted)
       .map(r => ({
         id: r.id,
-        institution: r.institution ?? "",
+        company: r.company ?? "",
         location: r.location ?? "",
-        degree: r.degree ?? "",
-        field_of_study: r.field_of_study ?? "",
+        position: r.position ?? "",
+        is_present: r.is_present,
         start_month: r.start_month,
         end_month: r.end_month,
+        description: r.description ?? "",
         remark: r.remark ?? "",
       }));
 
@@ -148,7 +166,7 @@ export default function EducationSection({ initialRows, onChange }: Props) {
 
   return (
     <div style={{ ...sectionBox }}>
-      <h2 style={{ fontSize: 18, fontWeight: 600, marginBottom: 12 }}>Education</h2>
+      <h2 style={{ fontSize: 18, fontWeight: 600, marginBottom: 12 }}>Work Experience</h2>
 
       <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
         {rows
@@ -176,34 +194,28 @@ export default function EducationSection({ initialRows, onChange }: Props) {
               >
                 <div style={{ fontWeight: 600 }}>Record #{index + 1}</div>
 
-                <button
-                  type="button"
-                  style={{
-                    border: "none",
-                    background: "transparent",
-                    color: "#cc0000",
-                    fontSize: 20,
-                    cursor: "pointer",
-                  }}
-                  onClick={() => removeRow(index)}
-                >
-                  ✕
-                </button>
-              </div>
+                  <button
+                    type="button"
+                    style={{
+                      border: "none",
+                      background: "transparent",
+                      color: "#cc0000",
+                      fontSize: 20,
+                      cursor: "pointer",
+                    }}
+                    onClick={() => removeRow(index)}
+                  >
+                    ✕
+                  </button>
+                </div>
 
-              {/* 2-column form layout */}
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr 1fr",
-                  gap: 16,
-                }}
-              >
+                {/* 2-column form layout */}
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
                 <InputField
-                  label="Institution"
-                  value={row.institution ?? ""}
+                  label="Company"
+                  value={row.company ?? ""}
                   mandate={true}
-                  onChange={v => updateField(index, "institution", v)}
+                  onChange={v => updateField(index, "company", v)}
                 />
 
                 <InputField
@@ -214,18 +226,20 @@ export default function EducationSection({ initialRows, onChange }: Props) {
                 />
 
                 <InputField
-                  label="Degree"
-                  value={row.degree ?? ""}
+                  label="Position"
+                  value={row.position ?? ""}
                   mandate={true}
-                  onChange={v => updateField(index, "degree", v)}
+                  onChange={v => updateField(index, "position", v)}
                 />
 
-                <InputField
-                  label="Field of Study"
-                  value={row.field_of_study ?? ""}
-                  mandate={true}
-                  onChange={v => updateField(index, "field_of_study", v)}
-                />
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <label style={{ margin: 0 }}>Is present?</label>
+                  <input
+                    type="checkbox"
+                    checked={!!row.is_present}
+                    onChange={e => updateField(index, "is_present", e.target.checked)}
+                  />                
+                </div>
 
                 <MonthPicker
                   label="Start Month"
@@ -239,6 +253,7 @@ export default function EducationSection({ initialRows, onChange }: Props) {
                   value={row.end_month}
                   mandate={true}
                   onChange={v => updateField(index, "end_month", v)}
+                  disabled={row.is_present} // <-- dim if is_present
                 />
               </div>
 
@@ -247,6 +262,18 @@ export default function EducationSection({ initialRows, onChange }: Props) {
                   {errors[index]}
                 </div>
               )}
+
+              {/* Description */}
+              <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                <label style={labelStyle}>
+                  <span>Description<span style={{ color: "red", fontWeight: "bold" }}> *</span></span>
+                </label>
+                <textarea
+                  style={{ ...inputStyle, resize: "vertical", minHeight: 80 }}
+                  value={row.description ?? ""}
+                  onChange={e => updateField(index, "description", e.target.value)}
+                />
+              </div>
 
               {/* Remark */}
               <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
@@ -275,7 +302,7 @@ export default function EducationSection({ initialRows, onChange }: Props) {
           }}
           onClick={addRow}
         >
-          + Add Education
+          + Add Work Experience
         </button>
       </div>
     </div>
