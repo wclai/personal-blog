@@ -1,5 +1,5 @@
 // lib/applyCrud.ts
-import { TABLE_COLUMNS } from "./profilesTableConfig";
+import { TABLE_COLUMNS } from "./profileTableConfig";
 
 function normalizeDate(value: any) {
   if (!value) return null; // <-- empty string or undefined/null becomes null

@@ -1,5 +1,5 @@
 
-// src/components/profiles/WorkSection.tsx
+// src/components/profile/WorkSection.tsx
 
 import { useState, useEffect, useRef } from "react";
 import MonthPicker from "./MonthPicker";

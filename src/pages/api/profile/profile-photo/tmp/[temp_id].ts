@@ -1,4 +1,4 @@
-// GET /api/profiles/profile-photo/tmp/[temp_id].ts
+// GET /api/profile/profile-photo/tmp/[temp_id].ts
 import type { NextApiRequest, NextApiResponse } from "next";
 import fs from "fs";
 import path from "path";

@@ -1,4 +1,4 @@
-// src/pages/profiles/[id].tsx
+// src/pages/profile/[id].tsx
 "use client";
 
 import { useEffect, useState } from "react";
@@ -9,8 +9,16 @@ import { labelStyle , inputStyle , sectionBox , buttonRow , buttonStyle } from "
 import { ConfirmModal } from "../../components/Modal";
 import UploadPhotoModal from "../../components/UploadPhoto";
 
-import EducationSection from "../../components/profiles/EducationSection";
-import WorkSection from "../../components/profiles/WorkSection";
+import EducationSection from "../../components/profile/EducationSection";
+import WorkSection from "../../components/profile/WorkSection";
+import LanguageSection from "../../components/profile/LanguageSection";
+/*
+import SkillSection from "../../components/profile/SkillSection";
+import CertificateSection from "../../components/profile/CertificateSection";
+import ProjectSection from "../../components/profile/ProjectSection";
+import VolunteerSection from "../../components/profile/VolunteerSection";
+import SocialSection from "../../components/profile/SocialSection";
+*/
 
 /* ---------- Types ---------- */
 interface ProfileMaster {
@@ -69,6 +77,20 @@ interface WorkChange {
   isValid: boolean;
 }
 
+interface PfLanguage {
+  id: number | null;
+  profile_id: number;
+  language: string;
+  proficiency: string;
+  remark: string;
+}
+
+interface LanguageChange {
+  upserts: PfLanguage[];
+  deleteIds: number[];
+  isValid: boolean;
+}
+
 /* Add temp field */
 type ProfileMasterWithTemp = ProfileMaster & {
   temp_photo_id: string | null;
@@ -77,7 +99,7 @@ type ProfileMasterWithTemp = ProfileMaster & {
 /* ---------- CLIENT helper functions ---------- */
 async function commitPhoto(profileId: number, temp_id: string) {
   const res = await fetch(
-    `/api/profiles/profile-photo/${profileId}/commit`,
+    `/api/profile/profile-photo/${profileId}/commit`,
     {
       method: "POST",
       credentials: "include",
@@ -104,6 +126,7 @@ export default function ProfileEditPage() {
   const [masterWithTemp, setMasterWithTemp] = useState<ProfileMasterWithTemp | null>(null);
   const [education, setEducation] = useState<PfEducation[]>([]);
   const [work, setWork] = useState<PfWork[]>([]);
+  const [language, setLanguage] = useState<PfLanguage[]>([]);
 
   const [educationPayload, setEducationPayload] = useState<EducationChange>({
     upserts: [],
@@ -111,6 +134,11 @@ export default function ProfileEditPage() {
     isValid: true,
   });
   const [workPayload, setWorkPayload] = useState<WorkChange>({
+    upserts: [],
+    deleteIds: [],
+    isValid: true,
+  });
+  const [languagePayload, setLanguagePayload] = useState<LanguageChange>({
     upserts: [],
     deleteIds: [],
     isValid: true,
@@ -137,7 +165,7 @@ export default function ProfileEditPage() {
 
     async function fetchProfile() {
       try {
-        const res = await fetch(`/api/profiles/${id}`, { credentials: "include" });
+        const res = await fetch(`/api/profile/${id}`, { credentials: "include" });
         if (!res.ok) throw new Error("Fetch failed");
 
         const data = await res.json();
@@ -146,6 +174,7 @@ export default function ProfileEditPage() {
         setMasterWithTemp(data.master); 
         setEducation(data.education);
         setWork(data.work);
+        setLanguage(data.language);
       } catch {
         setModal({ open: true, title: "Error", message: "Failed to fetch profile data." });
       }
@@ -168,7 +197,8 @@ export default function ProfileEditPage() {
     }
 
     if (educationPayload.isValid === false ||
-      workPayload.isValid === false
+      workPayload.isValid === false ||
+      languagePayload.isValid === false
     ) {
       setModal({
         open: true,
@@ -211,13 +241,14 @@ export default function ProfileEditPage() {
       }
 
       // 2) save profile
-      const res = await fetch(`/api/profiles/${id}`, {
+      const res = await fetch(`/api/profile/${id}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           master,
           education: educationPayload,
           work: workPayload,
+          language: languagePayload,
         }),
       });
 
@@ -247,9 +278,9 @@ export default function ProfileEditPage() {
 
   const currentPhotoSrc = 
     masterWithTemp?.temp_photo_id
-      ? `/api/profiles/profile-photo/tmp/${masterWithTemp.temp_photo_id}`
+      ? `/api/profile/profile-photo/tmp/${masterWithTemp.temp_photo_id}`
       : master?.photo_path
-        ? `/api/profiles/profile-photo/${profileId}`
+        ? `/api/profile/profile-photo/${profileId}`
         : null;
 
   return (
@@ -380,39 +411,50 @@ export default function ProfileEditPage() {
       </section>
 
       {/* ---------- Education Section ---------- */}
-      <section style={sectionBox}>
-        <EducationSection
-          initialRows={education}
-          onChange={(packet) => {
-            const normalized = {
-              ...packet,
-              upserts: packet.upserts.map((r) => ({
-                ...r,
-                profile_id: Number(id),
-              })),
-            };
-            setEducationPayload(normalized);
-          }}
-        />
-      </section>
+      <EducationSection
+        initialRows={education}
+        onChange={(packet) => {
+          const normalized = {
+            ...packet,
+            upserts: packet.upserts.map((r) => ({
+              ...r,
+              profile_id: Number(id),
+            })),
+          };
+          setEducationPayload(normalized);
+        }}
+      />
 
       {/* ---------- Work Section ---------- */}
-      <section style={sectionBox}>
-        <WorkSection
-          initialRows={work}
-          onChange={(packet) => {
-            const normalized = {
-              ...packet,
-              upserts: packet.upserts.map((r) => ({
-                ...r,
-                profile_id: Number(id),
-              })),
-            };
-            setWorkPayload(normalized);
-          }}
-        />
-      </section>
+      <WorkSection
+        initialRows={work}
+        onChange={(packet) => {
+          const normalized = {
+            ...packet,
+            upserts: packet.upserts.map((r) => ({
+              ...r,
+              profile_id: Number(id),
+            })),
+          };
+          setWorkPayload(normalized);
+        }}
+      />
       
+      {/* ---------- Language Section ---------- */}
+      <LanguageSection
+        initialRows={language}
+        onChange={(packet) => {
+          const normalized = {
+            ...packet,
+            upserts: packet.upserts.map((r) => ({
+              ...r,
+              profile_id: Number(id),
+            })),
+          };
+          setLanguagePayload(normalized);
+        }}
+      />
+
       <label style={labelStyle}>
         <span style={{ fontStyle: "italic" }}>Mandatory field(s) masked with <span style={{ color: "red", fontWeight: "bold" }}>*</span></span>
       </label>
@@ -476,7 +518,7 @@ export default function ProfileEditPage() {
         onClose={() => setConfirmReturn(false)}
         labelConfirm="Return"
         onConfirm={() => {
-          router.push("/profiles");
+          router.push("/profile");
         }}
       />
 

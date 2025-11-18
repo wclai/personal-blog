@@ -42,7 +42,7 @@ export default function ProfileForm({ profile, onSaved, onCancel }: ProfileFormP
     setSaving(true);
     try {
       const method = profile ? "PUT" : "POST";
-      const url = profile ? `/api/profiles/${profile.id}` : "/api/profiles";
+      const url = profile ? `/api/profile/${profile.id}` : "/api/profile";
       const res = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },

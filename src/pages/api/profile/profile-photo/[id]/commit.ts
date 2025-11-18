@@ -1,4 +1,4 @@
-// src/pages/api/profiles/profile-photo/[id]/commit.ts
+// src/pages/api/profile/profile-photo/[id]/commit.ts
 import type { NextApiRequest, NextApiResponse } from "next";
 import fs from "fs";
 import path from "path";
@@ -42,7 +42,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   const { rows } = await pool.query(
-    "SELECT user_id, photo_path FROM profiles WHERE id=$1",
+    "SELECT user_id, photo_path FROM profile WHERE id=$1",
     [profileId]
   );
   if (!rows.length) return res.status(404).end("Not found");
@@ -73,7 +73,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   // --- UPDATE DB ---
   const relative = `${profileId}/photo.jpg`; // relative to BASE_DIR
   await pool.query(
-    "UPDATE profiles SET photo_path=$1 WHERE id=$2",
+    "UPDATE profile SET photo_path=$1 WHERE id=$2",
     [relative, profileId]
   );
 

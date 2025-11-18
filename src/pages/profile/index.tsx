@@ -1,11 +1,11 @@
-// src/pages/profiles/index.tsx
+// src/pages/profile/index.tsx
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import type { Profile } from "../../types";
 import ProfileForm from "../../components/ProfileForm";
 
-export default function ProfilesPage() {
-  const [profiles, setProfiles] = useState<Profile[]>([]);
+export default function ProfilePage() {
+  const [profile, setProfile] = useState<Profile[]>([]);
   const [showProfileForm, setShowProfileForm] = useState(false);
   // NEW: auth states
   const [authLoading, setAuthLoading] = useState(true);
@@ -27,24 +27,24 @@ export default function ProfilesPage() {
   // ---------------------------------------------------------
   // Fetch public profiles
   // ---------------------------------------------------------
-  const fetchProfiles = async () => {
+  const fetchProfile = async () => {
     try {
-      const res = await fetch("/api/profiles?public=true", { credentials: "include" });
+      const res = await fetch("/api/profile?public=true", { credentials: "include" });
       if (res.ok) {
         const data = await res.json();
-        setProfiles(data);
+        setProfile(data);
       } else {
-        console.warn("Failed to fetch profiles:", res.status);
-        setProfiles([]);
+        console.warn("Failed to fetch profile:", res.status);
+        setProfile([]);
       }
     } catch (err) {
-      console.error("Error fetching profiles:", err);
-      setProfiles([]);
+      console.error("Error fetching profile:", err);
+      setProfile([]);
     }
   };
 
   useEffect(() => {
-    fetchProfiles();
+    fetchProfile();
   }, []);
 
   // Block page until auth check completes
@@ -56,7 +56,7 @@ export default function ProfilesPage() {
   };
 
   const handleProfileSaved = () => {
-    fetchProfiles();
+    fetchProfile();
     setShowProfileForm(false);
   };
 
@@ -81,7 +81,7 @@ export default function ProfilesPage() {
 
   return (
     <div style={{ maxWidth: 800, margin: "0 auto", padding: 20 }}>
-      <h1>Profiles</h1>
+      <h1>Profile</h1>
 
       <button
         onClick={handleCreateProfile}
@@ -106,7 +106,7 @@ export default function ProfilesPage() {
       )}
 
       <div>
-        {profiles.length === 0 ? (
+        {profile.length === 0 ? (
           <p>There is no Profiles.</p>
         ) : (
           <table
@@ -133,7 +133,7 @@ export default function ProfilesPage() {
             </thead>
 
             <tbody>
-              {profiles.map((p, i) => (
+              {profile.map((p, i) => (
                 <tr
                   key={p.id}
                   style={{
@@ -156,7 +156,7 @@ export default function ProfilesPage() {
 
                   <td style={tdStyle}>
                     <Link
-                      href={`/profiles/${p.id}`}
+                      href={`/profile/${p.id}`}
                       style={{
                         display: "inline-block",
                         padding: "6px 14px",

@@ -1,4 +1,4 @@
-// src/pages/api/profiles/profile-photo/[id].ts
+// src/pages/api/profile/profile-photo/[id].ts
 import type { NextApiRequest, NextApiResponse } from "next";
 import fs from "fs";
 import path from "path";
@@ -21,7 +21,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   try {
     const { rows } = await pool.query(
-      "SELECT id, user_id, is_public, photo_path FROM profiles WHERE id=$1",
+      "SELECT id, user_id, is_public, photo_path FROM profile WHERE id=$1",
       [profileId]
     );
     if (!rows.length) return res.status(404).end("Profile not found");

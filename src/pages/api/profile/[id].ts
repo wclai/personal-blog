@@ -1,4 +1,4 @@
-// src/pages/api/profiles/[id].ts
+// src/pages/api/profile/[id].ts
 
 import type { NextApiRequest, NextApiResponse } from "next";
 import { pool } from "../../../lib/db";
@@ -10,7 +10,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   if (req.method === "GET") {
     try {
-      const masterRes = await pool.query("SELECT * FROM profiles WHERE id=$1", [profileId]);
+      const masterRes = await pool.query("SELECT * FROM profile WHERE id=$1", [profileId]);
       const master = masterRes.rows[0];
 
       const contact =
@@ -28,7 +28,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         [profileId]
       )).rows;
 
-      res.status(200).json({ master: { ...master, contact }, education, work });
+      const language = (await pool.query(
+        "SELECT * FROM pf_language WHERE profile_id=$1 ORDER BY id",
+        [profileId]
+      )).rows;
+
+      res.status(200).json({ 
+        master: { ...master, contact }, 
+        education, 
+        work, 
+        language,
+      });
     } catch (err) {
       console.error(err);
       res.status(500).json({ error: "Failed to fetch profile" });
@@ -39,13 +49,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const client = await pool.connect();
 
     try {
-      const { master, education, work } = req.body;
+      const { master, education, work, language } = req.body;
 
       await client.query("BEGIN");
 
       // 1. Update master table
       await client.query(
-        `UPDATE profiles 
+        `UPDATE profile 
          SET pf_name=$1, name=$2, job_title=$3, tagline=$4, location=$5,
              introduction=$6, photo_path=$7, is_public=$8,
              contact=$9, updated_at=NOW()
@@ -64,9 +74,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         ]
       );
 
-      // 2. Profiles table CRUD
+      // 2. Profile table CRUD
       const eduRows = education?.upserts ?? [];
       const workRows = work?.upserts ?? [];
+      const langRows = language?.upserts ?? [];
 
       // Delete rows marked for deletion if any
       if (education?.deleteIds?.length) {
@@ -78,6 +89,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       if (work?.deleteIds?.length) {
         for (const delId of work.deleteIds) {
           await client.query(`DELETE FROM pf_work_experience WHERE id=$1`, [delId]);
+        }
+      }
+
+      if (language?.deleteIds?.length) {
+        for (const delId of language.deleteIds) {
+          await client.query(`DELETE FROM pf_languages WHERE id=$1`, [delId]);
         }
       }
 
@@ -114,12 +131,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         profileId
       );
 
+      const updatedLanguage = await applyCrud(
+        client,
+        "pf_languages",
+        langRows,
+        profileId
+      );
+
       await client.query("COMMIT");
 
       res.status(200).json({
         message: "Profile saved",
         education: updatedEducation,
         work: updatedWork,
+        language: updatedLanguage,
       });
 
     } catch (err) {

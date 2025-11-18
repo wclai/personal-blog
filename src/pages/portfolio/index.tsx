@@ -2,41 +2,41 @@ import { useEffect, useState } from "react";
 import type { Profile } from "../../types/index";
 
 export default function PortfolioPage() {
-  const [profiles, setProfiles] = useState<Profile[]>([]);
+  const [profile, setProfile] = useState<Profile[]>([]);
   const [selectedId, setSelectedId] = useState<number | null>(null);
 
   const selectedProfile =
-    profiles.find((p) => p.id === selectedId) || null;
+    profile.find((p) => p.id === selectedId) || null;
 
   useEffect(() => {
-    async function fetchProfiles() {
+    async function fetchProfile() {
       try {
-        const res = await fetch("/api/profiles?public=true", {
+        const res = await fetch("/api/profile?public=true", {
           credentials: "include",
         });
 
         if (!res.ok) {
           if (res.status === 401) {
-            setProfiles([]);
+            setProfile([]);
             return;
           }
-          console.warn("Unexpected response fetching profiles:", res.status);
+          console.warn("Unexpected response fetching profile:", res.status);
           return;
         }
 
         const data = await res.json();
-        setProfiles(data);
+        setProfile(data);
         if (data.length > 0) setSelectedId(data[0].id); // default select first
       } catch {
-        console.warn("Failed to fetch public profiles.");
-        setProfiles([]);
+        console.warn("Failed to fetch public profile.");
+        setProfile([]);
       }
     }
 
-    fetchProfiles();
+    fetchProfile();
   }, []);
 
-  if (profiles.length === 0)
+  if (profile.length === 0)
     return <p>No public profile available.</p>;
 
   return (
@@ -47,7 +47,7 @@ export default function PortfolioPage() {
         onChange={(e) => setSelectedId(Number(e.target.value))}
         style={{ padding: 6, marginBottom: 20 }}
       >
-        {profiles.map((p) => (
+        {profile.map((p) => (
           <option key={p.id} value={p.id}>
             {p.pf_name || p.name}
           </option>

@@ -42,7 +42,7 @@ export default function NavBar() {
             Portfolio
           </Link>
           {user?.role === "admin" && (
-            <Link href="/profiles" style={{ marginRight: 15 }}>
+            <Link href="/profile" style={{ marginRight: 15 }}>
               Admin
             </Link>
           )}

@@ -1,4 +1,4 @@
-// src/pages/api/profiles/profile-photo/[id]/upload.ts
+// src/pages/api/profile/profile-photo/[id]/upload.ts
 import type { NextApiRequest, NextApiResponse } from "next";
 import formidable from "formidable";
 import fs from "fs";
@@ -48,7 +48,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (req.headers["x-remove"]) {
     try {
       const { rows } = await pool.query(
-        "SELECT photo_path FROM profiles WHERE id=$1",
+        "SELECT photo_path FROM profile WHERE id=$1",
         [profileId]
       );
       if (!rows.length) return res.status(404).json({ error: "Not found" });
@@ -60,7 +60,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
 
       await pool.query(
-        "UPDATE profiles SET photo_path=null, updated_at=NOW() WHERE id=$1",
+        "UPDATE profile SET photo_path=null, updated_at=NOW() WHERE id=$1",
         [profileId]
       );
 
@@ -98,7 +98,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     try {
       // Verify owner/admin
       const { rows } = await pool.query(
-        "SELECT user_id FROM profiles WHERE id=$1",
+        "SELECT user_id FROM profile WHERE id=$1",
         [profileId]
       );
       if (!rows.length) return res.status(404).json({ error: "Profile not found" });
@@ -134,7 +134,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const relative = path.relative(UPLOAD_DIR, outPath).replace(/\\/g, "/");
 
       await pool.query(
-        "UPDATE profiles SET photo_path=$1, updated_at=NOW() WHERE id=$2",
+        "UPDATE profile SET photo_path=$1, updated_at=NOW() WHERE id=$2",
         [relative, profileId]
       );
 
@@ -150,7 +150,7 @@ export async function uploadTemp(file: File) {
   const form = new FormData();
   form.append("file", file);
 
-  const res = await fetch("/api/profiles/profile-photo/upload-temp", {
+  const res = await fetch("/api/profile/profile-photo/upload-temp", {
     method: "POST",
     body: form,
     credentials: "include",
@@ -161,7 +161,7 @@ export async function uploadTemp(file: File) {
 }
 
 export async function commitPhoto(profileId: number, temp_id: string) {
-  const res = await fetch(`/api/profiles/profile-photo/${profileId}/commit`, {
+  const res = await fetch(`/api/profile/profile-photo/${profileId}/commit`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ temp_id }),

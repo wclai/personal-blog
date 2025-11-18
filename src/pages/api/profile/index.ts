@@ -1,4 +1,4 @@
-// src/pages/api/profiles/index.ts
+// src/pages/api/profile/index.ts
 import type { NextApiRequest, NextApiResponse } from "next";
 import { pool } from "../../../lib/db";
 import { getUserFromRequest } from "../../../lib/auth";
@@ -11,7 +11,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       if (isPublicRequest) {
         // Public visitors: return only public profiles, no auth required
         const result = await pool.query(
-          "SELECT * FROM profiles WHERE is_delete = false AND is_public = true ORDER BY id"
+          "SELECT * FROM profile WHERE is_delete = false AND is_public = true ORDER BY id"
         );
         return res.status(200).json(result.rows);
       }
@@ -22,8 +22,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       const query =
         user.role === "admin"
-          ? "SELECT * FROM profiles WHERE is_delete = false ORDER BY id"
-          : "SELECT * FROM profiles WHERE is_delete = false AND is_public = true ORDER BY id";
+          ? "SELECT * FROM profile WHERE is_delete = false ORDER BY id"
+          : "SELECT * FROM profile WHERE is_delete = false AND is_public = true ORDER BY id";
 
       const result = await pool.query(query);
       return res.status(200).json(result.rows);
@@ -41,7 +41,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
 
       const insertQuery = `
-        INSERT INTO profiles (user_id, pf_name, name, job_title, tagline, location, is_public)
+        INSERT INTO profile (user_id, pf_name, name, job_title, tagline, location, is_public)
         VALUES ($1, $2, $3, $4, $5, $6, $7)
         RETURNING *
       `;
@@ -63,7 +63,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     res.setHeader("Allow", ["GET", "POST"]);
     return res.status(405).json({ error: `Method ${req.method} not allowed` });
   } catch (err) {
-    console.error("Profiles API error:", err);
+    console.error("Profile API error:", err);
     return res.status(500).json({ error: "Internal server error" });
   }
 }

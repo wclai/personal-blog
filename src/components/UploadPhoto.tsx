@@ -49,7 +49,7 @@ export default function UploadPhoto({
       const formData = new FormData();
       formData.append("file", file);
 
-      const res = await fetch("/api/profiles/profile-photo/upload-temp", {
+      const res = await fetch("/api/profile/profile-photo/upload-temp", {
         method: "POST",
         body: formData,
         credentials: "include",
@@ -100,7 +100,9 @@ export default function UploadPhoto({
           />
         </div>
         <p className="text-sm text-gray-500 mt-1">
-          Accepted: JPG / PNG / WebP • Max size: 2 MB
+          <span style={{ fontStyle: "italic" }}>
+            Accepted: JPG / PNG / WebP • Max size: 2 MB
+          </span>
         </p>
 
         {preview && (
