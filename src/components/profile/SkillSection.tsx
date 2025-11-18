@@ -1,15 +1,18 @@
+// SkillSection.tsx
+
 import { useState, useEffect, useRef } from "react";
+import MonthPicker from "./MonthPicker";
 import { labelStyle, inputStyle, sectionBox, buttonRow } from "../../styles/globalStyle";
 
 /* -----------------------------
    TypeScript Types
 ------------------------------ */
 
-export interface LanguageRow {
+export interface SkillRow {
   id: number | null;
   profile_id?: number;
-  language: string;
-  proficiency: string;
+  skill: string;
+  level: string;
   remark: string;
   created_at?: string;
   updated_at?: string;
@@ -17,9 +20,9 @@ export interface LanguageRow {
 }
 
 interface Props {
-  initialRows: LanguageRow[];
+  initialRows: SkillRow[];
   onChange?: (data: {
-    upserts: LanguageRow[];
+    upserts: SkillRow[];
     deleteIds: number[];
     isValid: boolean;
   }) => void;
@@ -29,8 +32,8 @@ interface Props {
    Component
 ------------------------------ */
 
-export default function LanguageSection({ initialRows, onChange }: Props) {
-  const [rows, setRows] = useState<LanguageRow[]>([]);
+export default function SkillSection({ initialRows, onChange }: Props) {
+  const [rows, setRows] = useState<SkillRow[]>([]);
   const [errors, setErrors] = useState<{ [index: number]: string }>({});
 
   /* Load initial DB rows */
@@ -45,8 +48,8 @@ export default function LanguageSection({ initialRows, onChange }: Props) {
       ...rows,
       {
         id: null,
-        language: "",
-        proficiency: "",
+        skill: "",
+        level: "",
         remark: "",
       },
     ]);
@@ -64,7 +67,7 @@ export default function LanguageSection({ initialRows, onChange }: Props) {
   };
 
   /* Update Field */
-  const updateField = (index: number, field: keyof LanguageRow, value: string) => {
+  const updateField = (index: number, field: keyof SkillRow, value: string) => {
     const next = [...rows];
     next[index] = { ...next[index], [field]: value };
     setRows(next);
@@ -73,7 +76,7 @@ export default function LanguageSection({ initialRows, onChange }: Props) {
   /* Validation */
   const validateRows = () => {
     const visible = rows.filter(r => !r._deleted);
-    return visible.every(r => r.language && r.proficiency);
+    return visible.every(r => r.skill && r.level);
   };
 
   /* Emit changes */
@@ -86,12 +89,15 @@ export default function LanguageSection({ initialRows, onChange }: Props) {
       return;
     }
 
+    const newErrors: { [index: number]: string } = {};
+    setErrors(newErrors);
+
     const upserts = rows
       .filter(r => !r._deleted)
       .map(r => ({
         id: r.id,
-        language: r.language ?? "",
-        proficiency: r.proficiency ?? "",
+        skill: r.skill ?? "",
+        level: r.level ?? "",
         remark: r.remark ?? "",
       }));
 
@@ -99,7 +105,7 @@ export default function LanguageSection({ initialRows, onChange }: Props) {
       .filter(r => r._deleted && r.id !== null)
       .map(r => r.id!) as number[];
 
-    const isValid = validateRows();
+    const isValid = validateRows() && Object.keys(newErrors).length === 0;
 
     onChange({ upserts, deleteIds, isValid });
   }, [rows]);
@@ -110,7 +116,7 @@ export default function LanguageSection({ initialRows, onChange }: Props) {
 
   return (
     <div style={{ ...sectionBox }}>
-      <h2 style={{ fontSize: 18, fontWeight: 600, marginBottom: 12 }}>Languages</h2>
+      <h2 style={{ fontSize: 18, fontWeight: 600, marginBottom: 12 }}>Skills</h2>
 
       <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
         {rows
@@ -153,7 +159,7 @@ export default function LanguageSection({ initialRows, onChange }: Props) {
                 </button>
               </div>
 
-              {/* 3-column form layout */}
+              {/* 2-column form layout */}
               <div
                 style={{
                   display: "grid",
@@ -162,17 +168,17 @@ export default function LanguageSection({ initialRows, onChange }: Props) {
                 }}
               >
                 <InputField
-                  label="Language"
-                  value={row.language}
+                  label="Skill"
+                  value={row.skill ?? ""}
                   mandate={true}
-                  onChange={v => updateField(index, "language", v)}
+                  onChange={v => updateField(index, "skill", v)}
                 />
 
                 <InputField
-                  label="Proficiency"
-                  value={row.proficiency}
+                  label="Level"
+                  value={row.level ?? ""}
                   mandate={true}
-                  onChange={v => updateField(index, "proficiency", v)}
+                  onChange={v => updateField(index, "level", v)}
                 />
 
                 <InputField
@@ -199,7 +205,7 @@ export default function LanguageSection({ initialRows, onChange }: Props) {
           }}
           onClick={addRow}
         >
-          + Add Language
+          + Add Skill
         </button>
       </div>
     </div>
@@ -215,7 +221,7 @@ function InputField({
   value,
   type = "text",
   mandate,
-  onChange
+  onChange,
 }: {
   label: string;
   value: string;

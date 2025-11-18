@@ -12,13 +12,12 @@ import UploadPhotoModal from "../../components/UploadPhoto";
 import EducationSection from "../../components/profile/EducationSection";
 import WorkSection from "../../components/profile/WorkSection";
 import LanguageSection from "../../components/profile/LanguageSection";
-/*
 import SkillSection from "../../components/profile/SkillSection";
 import CertificateSection from "../../components/profile/CertificateSection";
 import ProjectSection from "../../components/profile/ProjectSection";
 import VolunteerSection from "../../components/profile/VolunteerSection";
-import SocialSection from "../../components/profile/SocialSection";
-*/
+import SocialLinkSection from "../../components/profile/SocialLinkSection";
+
 
 /* ---------- Types ---------- */
 interface ProfileMaster {
@@ -91,6 +90,83 @@ interface LanguageChange {
   isValid: boolean;
 }
 
+interface PfSkill {
+  id: number | null;
+  profile_id: number;
+  skill: string;
+  level: string;
+  remark: string;
+}
+
+interface SkillChange {
+  upserts: PfSkill[];
+  deleteIds: number[];
+  isValid: boolean;
+}
+
+interface PfCertificate {
+  id: number | null;
+  profile_id: number;
+  title: string;
+  issuer: string;
+  issue_date: string;
+  expiry_date: string;
+  remark: string;
+}
+
+interface CertificateChange {
+  upserts: PfCertificate[];
+  deleteIds: number[];
+  isValid: boolean;
+}
+
+interface PfProject {
+  id: number | null;
+  profile_id: number;
+  title: string;
+  description: string;
+  link: string;
+  remark: string;
+}
+
+interface ProjectChange {
+  upserts: PfProject[];
+  deleteIds: number[];
+  isValid: boolean;
+}
+
+interface PfVolunteer {
+  id: number | null;
+  profile_id: number;
+  organization: string;
+  role: string;
+  description: string;
+  is_present: boolean;
+  start_month: string;
+  end_month: string;
+  remark: string;
+}
+
+interface VolunteerChange {
+  upserts: PfVolunteer[];
+  deleteIds: number[];
+  isValid: boolean;
+}
+
+interface PfSocialLink {
+  id: number | null;
+  profile_id: number;
+  platform: string;
+  url: string;
+  remark: string;
+}
+
+interface SocialLinkChange {
+  upserts: PfSocialLink[];
+  deleteIds: number[];
+  isValid: boolean;
+}
+
 /* Add temp field */
 type ProfileMasterWithTemp = ProfileMaster & {
   temp_photo_id: string | null;
@@ -127,6 +203,11 @@ export default function ProfileEditPage() {
   const [education, setEducation] = useState<PfEducation[]>([]);
   const [work, setWork] = useState<PfWork[]>([]);
   const [language, setLanguage] = useState<PfLanguage[]>([]);
+  const [skill, setSkill] = useState<PfSkill[]>([]);
+  const [certificate, setCertificate] = useState<PfCertificate[]>([]);
+  const [project, setProject] = useState<PfProject[]>([]);
+  const [volunteer, setVolunteer] = useState<PfVolunteer[]>([]);
+  const [socialLink, setSocialLink] = useState<PfSocialLink[]>([]);
 
   const [educationPayload, setEducationPayload] = useState<EducationChange>({
     upserts: [],
@@ -144,6 +225,36 @@ export default function ProfileEditPage() {
     isValid: true,
   });
 
+  const [skillPayload, setSkillPayload] = useState<SkillChange>({
+    upserts: [],
+    deleteIds: [],
+    isValid: true,
+  });
+  
+  const [certificatePayload, setCertificatePayload] = useState<CertificateChange>({
+    upserts: [],
+    deleteIds: [],
+    isValid: true,
+  });
+  
+  const [projectPayload, setProjectPayload] = useState<ProjectChange>({
+    upserts: [],
+    deleteIds: [],
+    isValid: true,
+  });
+  
+  const [volunteerPayload, setVolunteerPayload] = useState<VolunteerChange>({
+    upserts: [],
+    deleteIds: [],
+    isValid: true,
+  });
+  
+  const [socialLinkPayload, setSocialLinkPayload] = useState<SocialLinkChange>({
+    upserts: [],
+    deleteIds: [],
+    isValid: true,
+  });
+  
   const [saving, setSaving] = useState(false);
 
   // Modal states
@@ -175,6 +286,12 @@ export default function ProfileEditPage() {
         setEducation(data.education);
         setWork(data.work);
         setLanguage(data.language);
+        setSkill(data.skill);
+        setCertificate(data.certificate);
+        setProject(data.project);
+        setVolunteer(data.volunteer);
+        setSocialLink(data.socialLink);
+
       } catch {
         setModal({ open: true, title: "Error", message: "Failed to fetch profile data." });
       }
@@ -198,12 +315,17 @@ export default function ProfileEditPage() {
 
     if (educationPayload.isValid === false ||
       workPayload.isValid === false ||
-      languagePayload.isValid === false
+      languagePayload.isValid === false ||
+      skillPayload.isValid === false||
+      certificatePayload.isValid === false||
+      projectPayload.isValid === false||
+      volunteerPayload.isValid === false||
+      socialLinkPayload.isValid === false
     ) {
       setModal({
         open: true,
         title: "Validation",
-        message: "Please fill in all mandatory fields.",
+        message: "Please check for any incorrect input.",
       });
       return;
     }
@@ -216,6 +338,22 @@ export default function ProfileEditPage() {
     }
 
     for (const row of work) {
+      if (!row.is_present && row.end_month) {
+        if (row.start_month && row.end_month < row.start_month) {
+          alert("End Month must be later or equal to Start Month.");
+          return;
+        }
+      }
+    }
+
+    for (const row of certificate) {
+      if (row.expiry_date && row.expiry_date < row.issue_date) {
+        alert("Expiry Date must be later or equal to Issue Date.");
+        return;
+      }
+    }
+
+    for (const row of volunteer) {
       if (!row.is_present && row.end_month) {
         if (row.start_month && row.end_month < row.start_month) {
           alert("End Month must be later or equal to Start Month.");
@@ -249,6 +387,11 @@ export default function ProfileEditPage() {
           education: educationPayload,
           work: workPayload,
           language: languagePayload,
+          skill: skillPayload,
+          certificate: certificatePayload,
+          project: projectPayload,
+          volunteer: volunteerPayload,
+          socialLink: socialLinkPayload,
         }),
       });
 
@@ -452,6 +595,81 @@ export default function ProfileEditPage() {
             })),
           };
           setLanguagePayload(normalized);
+        }}
+      />
+
+      {/* ---------- Skill Section ---------- */}
+      <SkillSection
+        initialRows={skill}
+        onChange={(packet) => {
+          const normalized = {
+            ...packet,
+            upserts: packet.upserts.map((r) => ({
+              ...r,
+              profile_id: Number(id),
+            })),
+          };
+          setSkillPayload(normalized);
+        }}
+      />
+
+      {/* ---------- Certificate Section ---------- */}
+      <CertificateSection
+        initialRows={certificate}
+        onChange={(packet) => {
+          const normalized = {
+            ...packet,
+            upserts: packet.upserts.map((r) => ({
+              ...r,
+              profile_id: Number(id),
+            })),
+          };
+          setCertificatePayload(normalized);
+        }}
+      />
+
+      {/* ---------- Project Section ---------- */}
+      <ProjectSection
+        initialRows={project}
+        onChange={(packet) => { 
+          const normalized = {
+            ...packet,
+            upserts: packet.upserts.map((r) => ({
+              ...r,
+              profile_id: Number(id),
+            })),
+          };
+          setProjectPayload(normalized);
+        }}
+      />
+
+      {/* ---------- Volunteer Section ---------- */}
+      <VolunteerSection
+        initialRows={volunteer}
+        onChange={(packet) => {
+          const normalized = {
+            ...packet,
+            upserts: packet.upserts.map((r) => ({
+              ...r,
+              profile_id: Number(id),
+            })),
+          };
+          setVolunteerPayload(normalized);
+        }}
+      />
+
+      {/* ---------- Social Link Section ---------- */}
+      <SocialLinkSection
+        initialRows={socialLink}
+        onChange={(packet) => {
+          const normalized = {
+            ...packet,
+            upserts: packet.upserts.map((r) => ({
+              ...r,
+              profile_id: Number(id),
+            })),
+          };
+          setSocialLinkPayload(normalized);
         }}
       />
 

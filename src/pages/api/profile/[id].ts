@@ -33,11 +33,41 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         [profileId]
       )).rows;
 
+      const skill = (await pool.query(
+        "SELECT * FROM pf_skill WHERE profile_id=$1 ORDER BY id",
+        [profileId]
+      )).rows;
+      
+      const certificate = (await pool.query(
+        "SELECT * FROM pf_certificate WHERE profile_id=$1 ORDER BY issue_date DESC",
+        [profileId]
+      )).rows;
+      
+      const project = (await pool.query(
+        "SELECT * FROM pf_project WHERE profile_id=$1 ORDER BY id",
+        [profileId]
+      )).rows;
+      
+      const volunteer = (await pool.query(
+        "SELECT * FROM pf_volunteer_experience WHERE profile_id=$1 ORDER BY start_month DESC",
+        [profileId]
+      )).rows;
+      
+      const socialLink = (await pool.query(
+        "SELECT * FROM pf_social_link WHERE profile_id=$1 ORDER BY id",
+        [profileId]
+      )).rows;
+
       res.status(200).json({ 
         master: { ...master, contact }, 
         education, 
         work, 
         language,
+        skill,
+        certificate,
+        project,
+        volunteer,
+        socialLink,
       });
     } catch (err) {
       console.error(err);
@@ -49,7 +79,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const client = await pool.connect();
 
     try {
-      const { master, education, work, language } = req.body;
+      const { 
+        master, 
+        education, 
+        work, 
+        language, 
+        skill, 
+        certificate,
+        project,
+        volunteer,
+        socialLink,
+      } = req.body;
 
       await client.query("BEGIN");
 
@@ -78,6 +118,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const eduRows = education?.upserts ?? [];
       const workRows = work?.upserts ?? [];
       const langRows = language?.upserts ?? [];
+      const skillRows = skill?.upserts ?? [];
+      const certRows = certificate?.upserts ?? [];
+      const projectRows = project?.upserts ?? [];
+      const volunteerRows = volunteer?.upserts ?? [];
+      const socialRows = socialLink?.upserts ?? [];
 
       // Delete rows marked for deletion if any
       if (education?.deleteIds?.length) {
@@ -94,7 +139,37 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       if (language?.deleteIds?.length) {
         for (const delId of language.deleteIds) {
-          await client.query(`DELETE FROM pf_languages WHERE id=$1`, [delId]);
+          await client.query(`DELETE FROM pf_language WHERE id=$1`, [delId]);
+        }
+      }
+
+      if (skill?.deleteIds?.length) {
+        for (const delId of skill.deleteIds) {
+          await client.query(`DELETE FROM pf_skill WHERE id=$1`, [delId]);
+        }
+      }
+
+      if (certificate?.deleteIds?.length) {
+        for (const delId of certificate.deleteIds) {
+          await client.query(`DELETE FROM pf_certificate WHERE id=$1`, [delId]);
+        }
+      }
+
+      if (project?.deleteIds?.length) {
+        for (const delId of project.deleteIds) {
+          await client.query(`DELETE FROM pf_project WHERE id=$1`, [delId]);
+        }
+      }
+
+      if (volunteer?.deleteIds?.length) {
+        for (const delId of volunteer.deleteIds) {
+          await client.query(`DELETE FROM pf_volunteer_experience WHERE id=$1`, [delId]);
+        }
+      }
+
+      if (socialLink?.deleteIds?.length) {
+        for (const delId of socialLink.deleteIds) {
+          await client.query(`DELETE FROM pf_social_link WHERE id=$1`, [delId]);
         }
       }
 
@@ -133,11 +208,46 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       const updatedLanguage = await applyCrud(
         client,
-        "pf_languages",
+        "pf_language",
         langRows,
         profileId
       );
 
+      const updatedSkill = await applyCrud(
+        client,
+        "pf_skill",
+        skillRows,
+        profileId
+      );
+
+      const updatedCertificate = await applyCrud(
+        client,
+        "pf_certificate",
+        certRows,
+        profileId
+      );
+
+      const updatedProject = await applyCrud(
+        client,
+        "pf_project",
+        projectRows,
+        profileId
+      );
+
+      const updatedVolunteer = await applyCrud(
+        client,
+        "pf_volunteer_experience",
+        volunteerRows,
+        profileId
+      );
+
+      const updatedSocialLink = await applyCrud(
+        client,
+        "pf_social_link",
+        socialRows,
+        profileId
+      );
+      
       await client.query("COMMIT");
 
       res.status(200).json({
@@ -145,6 +255,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         education: updatedEducation,
         work: updatedWork,
         language: updatedLanguage,
+        skill: updatedSkill,
+        certificate: updatedCertificate,
+        project: updatedProject,
+        volunteer: updatedVolunteer,
+        socialLink: updatedSocialLink,
       });
 
     } catch (err) {

@@ -1,4 +1,4 @@
-// src/components/profile/WorkSection.tsx
+// src/components/profile/VolunteerSection.tsx
 
 import { useState, useEffect, useRef } from "react";
 import MonthPicker from "./MonthPicker";
@@ -8,14 +8,13 @@ import { labelStyle, inputStyle, sectionBox, buttonRow } from "../../styles/glob
    TypeScript Types
 ------------------------------ */
 
-export interface WorkRow {
+export interface VolunteerRow {
   id: number | null;
   profile_id?: number;
-  company: string;
-  location: string;
-  position: string;
-  start_month: string;
-  end_month: string;
+  organization: string;
+  role: string;
+  start_month: string; // "YYYY-MM"
+  end_month: string;   // "YYYY-MM"
   is_present: boolean;
   description: string;
   remark: string;
@@ -25,9 +24,9 @@ export interface WorkRow {
 }
 
 interface Props {
-  initialRows: WorkRow[];
+  initialRows: VolunteerRow[];
   onChange?: (data: {
-    upserts: WorkRow[];
+    upserts: VolunteerRow[];
     deleteIds: number[];
     isValid: boolean;
   }) => void;
@@ -37,8 +36,8 @@ interface Props {
    Component
 ------------------------------ */
 
-export default function WorkSection({ initialRows, onChange }: Props) {
-  const [rows, setRows] = useState<WorkRow[]>([]);
+export default function VolunteerSection({ initialRows, onChange }: Props) {
+  const [rows, setRows] = useState<VolunteerRow[]>([]);
   const [errors, setErrors] = useState<{ [index: number]: string }>({});
 
   /* Load initial DB rows */
@@ -60,9 +59,8 @@ export default function WorkSection({ initialRows, onChange }: Props) {
       ...rows,
       {
         id: null,
-        company: "",        
-        location: "",
-        position: "",
+        organization: "",
+        role: "",
         start_month: "",
         end_month: "",
         is_present: false,
@@ -85,12 +83,11 @@ export default function WorkSection({ initialRows, onChange }: Props) {
 
   /* Update Field */
   const updateField = (
-    index: number, 
-    field: keyof WorkRow, 
+    index: number,
+    field: keyof VolunteerRow,
     value: any
   ) => {
     const next = [...rows];
-
     if (field === "is_present") {
       next[index] = {
         ...next[index],
@@ -100,7 +97,6 @@ export default function WorkSection({ initialRows, onChange }: Props) {
     } else {
       next[index] = { ...next[index], [field]: value };
     }
-
     setRows(next);
   };
 
@@ -109,12 +105,10 @@ export default function WorkSection({ initialRows, onChange }: Props) {
     const visible = rows.filter(r => !r._deleted);
     return visible.every(
       r =>
-        r.company &&
-        r.location &&
-        r.position &&
+        r.organization &&
+        r.role &&
         r.start_month &&
-        (!r.is_present ? r.end_month : true) && // skip end_month check if is_present      
-        r.description
+        (!r.is_present ? r.end_month : true) // skip end_month check if is_present      
     );
   };
 
@@ -144,9 +138,8 @@ export default function WorkSection({ initialRows, onChange }: Props) {
       .filter(r => !r._deleted)
       .map(r => ({
         id: r.id,
-        company: r.company ?? "",
-        location: r.location ?? "",
-        position: r.position ?? "",
+        organization: r.organization ?? "",
+        role: r.role ?? "",
         start_month: r.start_month,
         end_month: r.end_month,
         is_present: r.is_present,
@@ -169,7 +162,7 @@ export default function WorkSection({ initialRows, onChange }: Props) {
 
   return (
     <div style={{ ...sectionBox }}>
-      <h2 style={{ fontSize: 18, fontWeight: 600, marginBottom: 12 }}>Work Experience</h2>
+      <h2 style={{ fontSize: 18, fontWeight: 600, marginBottom: 12 }}>Volunteer Experience</h2>
 
       <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
         {rows
@@ -212,30 +205,27 @@ export default function WorkSection({ initialRows, onChange }: Props) {
                 </button>
               </div>
 
-                {/* 2-column form layout */}
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+              {/* 2-column form layout */}
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr",
+                  gap: 16,
+                }}
+              >
                 <InputField
-                  label="Company"
-                  value={row.company ?? ""}
+                  label="Organization"
+                  value={row.organization ?? ""}
                   mandate={true}
-                  onChange={v => updateField(index, "company", v)}
+                  onChange={v => updateField(index, "organization", v)}
                 />
 
                 <InputField
-                  label="Location"
-                  value={row.location ?? ""}
+                  label="Role"
+                  value={row.role ?? ""}
                   mandate={true}
-                  onChange={v => updateField(index, "location", v)}
+                  onChange={v => updateField(index, "role", v)}
                 />
-
-                <InputField
-                  label="Position"
-                  value={row.position ?? ""}
-                  mandate={true}
-                  onChange={v => updateField(index, "position", v)}
-                />
-
-                <p></p>
 
                 <MonthPicker
                   label="Start Month"
@@ -259,21 +249,19 @@ export default function WorkSection({ initialRows, onChange }: Props) {
                 </div>
               )}
 
-              {/* Currently working checkbox */}
+              {/* Currently volunteering checkbox */}
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                 <input
                   type="checkbox"
                   checked={row.is_present}
                   onChange={e => updateField(index, "is_present", e.target.checked)}
                 />
-                <span style={{ fontSize: 14 }}>I am currently working here</span>
+                <span style={{ fontSize: 14 }}>I am currently volunteering here</span>
               </div>
 
               {/* Description */}
               <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                <label style={labelStyle}>
-                  <span>Description<span style={{ color: "red", fontWeight: "bold" }}> *</span></span>
-                </label>
+                <label style={labelStyle}>Description</label>
                 <textarea
                   style={{ ...inputStyle, resize: "vertical", minHeight: 80 }}
                   value={row.description ?? ""}
@@ -308,7 +296,7 @@ export default function WorkSection({ initialRows, onChange }: Props) {
           }}
           onClick={addRow}
         >
-          + Add Work Experience
+          + Add Volunteer Experience
         </button>
       </div>
     </div>
@@ -323,8 +311,8 @@ function InputField({
   label,
   value,
   type = "text",
-  mandate,  
-  onChange
+  mandate,
+  onChange,
 }: {
   label: string;
   value: string;
@@ -336,7 +324,7 @@ function InputField({
     <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
       <label style={labelStyle}>
         <span>
-          {label} 
+          {label}
           {mandate && <span style={{ color: "red", fontWeight: "bold" }}> *</span>}
         </span>
       </label>

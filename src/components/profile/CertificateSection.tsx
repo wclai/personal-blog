@@ -1,23 +1,20 @@
-// src/components/profile/WorkSection.tsx
+// CertificateSection.tsx
 
 import { useState, useEffect, useRef } from "react";
-import MonthPicker from "./MonthPicker";
+import MonthPicker from "./MonthPicker"; // Not used here, but kept import style consistent if you later want month-level
 import { labelStyle, inputStyle, sectionBox, buttonRow } from "../../styles/globalStyle";
 
 /* -----------------------------
    TypeScript Types
 ------------------------------ */
 
-export interface WorkRow {
+export interface CertificateRow {
   id: number | null;
   profile_id?: number;
-  company: string;
-  location: string;
-  position: string;
-  start_month: string;
-  end_month: string;
-  is_present: boolean;
-  description: string;
+  title: string;
+  issuer: string;
+  issue_date: string;   // "YYYY-MM-DD"
+  expiry_date: string;  // "YYYY-MM-DD"
   remark: string;
   created_at?: string;
   updated_at?: string;
@@ -25,9 +22,9 @@ export interface WorkRow {
 }
 
 interface Props {
-  initialRows: WorkRow[];
+  initialRows: CertificateRow[];
   onChange?: (data: {
-    upserts: WorkRow[];
+    upserts: CertificateRow[];
     deleteIds: number[];
     isValid: boolean;
   }) => void;
@@ -37,18 +34,17 @@ interface Props {
    Component
 ------------------------------ */
 
-export default function WorkSection({ initialRows, onChange }: Props) {
-  const [rows, setRows] = useState<WorkRow[]>([]);
+export default function CertificateSection({ initialRows, onChange }: Props) {
+  const [rows, setRows] = useState<CertificateRow[]>([]);
   const [errors, setErrors] = useState<{ [index: number]: string }>({});
 
   /* Load initial DB rows */
   useEffect(() => {
     if (!initialRows) return;
-
-    const normalized = initialRows.map(r => ({
+      const normalized = initialRows.map(r => ({
       ...r,
-      start_month: r.start_month ? r.start_month.slice(0, 7) : "",
-      end_month: r.end_month ? r.end_month.slice(0, 7) : "",
+      issue_date: r.issue_date ? r.issue_date.slice(0, 10) : "",
+      expiry_date: r.expiry_date ? r.expiry_date.slice(0, 10) : "",
     }));
 
     setRows(normalized);
@@ -60,13 +56,10 @@ export default function WorkSection({ initialRows, onChange }: Props) {
       ...rows,
       {
         id: null,
-        company: "",        
-        location: "",
-        position: "",
-        start_month: "",
-        end_month: "",
-        is_present: false,
-        description: "",
+        title: "",
+        issuer: "",
+        issue_date: "",
+        expiry_date: "",
         remark: "",
       },
     ]);
@@ -84,23 +77,9 @@ export default function WorkSection({ initialRows, onChange }: Props) {
   };
 
   /* Update Field */
-  const updateField = (
-    index: number, 
-    field: keyof WorkRow, 
-    value: any
-  ) => {
+  const updateField = (index: number, field: keyof CertificateRow, value: string) => {
     const next = [...rows];
-
-    if (field === "is_present") {
-      next[index] = {
-        ...next[index],
-        is_present: value,
-        end_month: value ? "" : next[index].end_month, // clear end_month if present
-      };
-    } else {
-      next[index] = { ...next[index], [field]: value };
-    }
-
+    next[index] = { ...next[index], [field]: value };
     setRows(next);
   };
 
@@ -109,12 +88,9 @@ export default function WorkSection({ initialRows, onChange }: Props) {
     const visible = rows.filter(r => !r._deleted);
     return visible.every(
       r =>
-        r.company &&
-        r.location &&
-        r.position &&
-        r.start_month &&
-        (!r.is_present ? r.end_month : true) && // skip end_month check if is_present      
-        r.description
+        r.title &&
+        r.issuer &&
+        r.issue_date
     );
   };
 
@@ -131,10 +107,8 @@ export default function WorkSection({ initialRows, onChange }: Props) {
     const newErrors: { [index: number]: string } = {};
 
     rows.forEach((r, i) => {
-      if (!r._deleted && !r.is_present && r.start_month && r.end_month) {
-        if (r.end_month < r.start_month) {
-          newErrors[i] = "End Month must be later or equal to Start Month.";
-        }
+      if (r.expiry_date && r.issue_date && r.expiry_date < r.issue_date) {
+        newErrors[i] = "Expiry Date must be later or equal to Issue Date.";
       }
     });
 
@@ -144,13 +118,10 @@ export default function WorkSection({ initialRows, onChange }: Props) {
       .filter(r => !r._deleted)
       .map(r => ({
         id: r.id,
-        company: r.company ?? "",
-        location: r.location ?? "",
-        position: r.position ?? "",
-        start_month: r.start_month,
-        end_month: r.end_month,
-        is_present: r.is_present,
-        description: r.description ?? "",
+        title: r.title ?? "",
+        issuer: r.issuer ?? "",
+        issue_date: r.issue_date,
+        expiry_date: r.expiry_date,
         remark: r.remark ?? "",
       }));
 
@@ -160,7 +131,7 @@ export default function WorkSection({ initialRows, onChange }: Props) {
 
     const isValid = validateRows() && Object.keys(newErrors).length === 0;
 
-    onChange({ upserts, deleteIds, isValid: validateRows() });
+    onChange({ upserts, deleteIds, isValid });
   }, [rows]);
 
   /* -----------------------------
@@ -169,7 +140,7 @@ export default function WorkSection({ initialRows, onChange }: Props) {
 
   return (
     <div style={{ ...sectionBox }}>
-      <h2 style={{ fontSize: 18, fontWeight: 600, marginBottom: 12 }}>Work Experience</h2>
+      <h2 style={{ fontSize: 18, fontWeight: 600, marginBottom: 12 }}>Certificates</h2>
 
       <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
         {rows
@@ -212,44 +183,42 @@ export default function WorkSection({ initialRows, onChange }: Props) {
                 </button>
               </div>
 
-                {/* 2-column form layout */}
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+              {/* 2-column form layout */}
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr",
+                  gap: 16,
+                }}
+              >
                 <InputField
-                  label="Company"
-                  value={row.company ?? ""}
+                  label="Title"
+                  value={row.title ?? ""}
                   mandate={true}
-                  onChange={v => updateField(index, "company", v)}
+                  onChange={v => updateField(index, "title", v)}
                 />
 
                 <InputField
-                  label="Location"
-                  value={row.location ?? ""}
+                  label="Issuer"
+                  value={row.issuer ?? ""}
                   mandate={true}
-                  onChange={v => updateField(index, "location", v)}
+                  onChange={v => updateField(index, "issuer", v)}
                 />
 
                 <InputField
-                  label="Position"
-                  value={row.position ?? ""}
+                  label="Issue Date"
+                  type="date"
+                  value={row.issue_date ?? ""}
                   mandate={true}
-                  onChange={v => updateField(index, "position", v)}
+                  onChange={v => updateField(index, "issue_date", v)}
                 />
 
-                <p></p>
-
-                <MonthPicker
-                  label="Start Month"
-                  value={row.start_month}
-                  mandate={true}
-                  onChange={v => updateField(index, "start_month", v)}
-                />
-
-                <MonthPicker
-                  label="End Month"
-                  value={row.end_month}
-                  mandate={true}
-                  onChange={v => updateField(index, "end_month", v)}
-                  disabled={row.is_present} // <-- dim if is_present
+                <InputField
+                  label="Expiry Date"
+                  type="date"
+                  value={row.expiry_date ?? ""}
+                  mandate={false}
+                  onChange={v => updateField(index, "expiry_date", v)}
                 />
               </div>
 
@@ -258,28 +227,6 @@ export default function WorkSection({ initialRows, onChange }: Props) {
                   {errors[index]}
                 </div>
               )}
-
-              {/* Currently working checkbox */}
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <input
-                  type="checkbox"
-                  checked={row.is_present}
-                  onChange={e => updateField(index, "is_present", e.target.checked)}
-                />
-                <span style={{ fontSize: 14 }}>I am currently working here</span>
-              </div>
-
-              {/* Description */}
-              <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                <label style={labelStyle}>
-                  <span>Description<span style={{ color: "red", fontWeight: "bold" }}> *</span></span>
-                </label>
-                <textarea
-                  style={{ ...inputStyle, resize: "vertical", minHeight: 80 }}
-                  value={row.description ?? ""}
-                  onChange={e => updateField(index, "description", e.target.value)}
-                />
-              </div>
 
               {/* Remark */}
               <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
@@ -308,7 +255,7 @@ export default function WorkSection({ initialRows, onChange }: Props) {
           }}
           onClick={addRow}
         >
-          + Add Work Experience
+          + Add Certificate
         </button>
       </div>
     </div>
@@ -323,8 +270,8 @@ function InputField({
   label,
   value,
   type = "text",
-  mandate,  
-  onChange
+  mandate,
+  onChange,
 }: {
   label: string;
   value: string;
@@ -336,7 +283,7 @@ function InputField({
     <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
       <label style={labelStyle}>
         <span>
-          {label} 
+          {label}
           {mandate && <span style={{ color: "red", fontWeight: "bold" }}> *</span>}
         </span>
       </label>
