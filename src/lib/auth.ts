@@ -1,3 +1,5 @@
+// src/lib/auth.ts
+
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { parse } from "cookie";
 import type { NextApiRequest } from "next";

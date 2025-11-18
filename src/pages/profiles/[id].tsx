@@ -4,8 +4,10 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { useAuth } from "../../context/AuthContext";
+
+import { labelStyle , inputStyle , sectionBox , buttonRow , buttonStyle } from "../../styles/globalStyle";
 import { ConfirmModal } from "../../components/Modal";
-import { labelStyle , inputStyle , sectionBox , buttonRow , buttonStyle, confirmButtonStyle, Red } from "../../styles/globalStyle";
+import UploadPhotoModal from "../../components/UploadPhoto";
 
 import EducationSection from "../../components/profiles/EducationSection";
 import WorkSection from "../../components/profiles/WorkSection";
@@ -19,7 +21,8 @@ interface ProfileMaster {
   tagline: string;
   location: string;
   introduction: string;
-  photo_path: string;
+  photo_path: string | null;
+  temp_photo_id: string | null;
   is_public: boolean;
   contact: {
     telephone: string;
@@ -58,13 +61,32 @@ interface PfWork {
   start_month: string;
   end_month: string;
   remark: string;
-
 }
 
 interface WorkChange {
   upserts: PfWork[];
   deleteIds: number[];
   isValid: boolean;
+}
+
+/* Add temp field */
+type ProfileMasterWithTemp = ProfileMaster & {
+  temp_photo_id: string | null;
+};
+
+/* ---------- CLIENT helper functions ---------- */
+async function commitPhoto(profileId: number, temp_id: string) {
+  const res = await fetch(
+    `/api/profiles/profile-photo/${profileId}/commit`,
+    {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ temp_id }),
+    }
+  );
+  if (!res.ok) throw new Error("Commit failed");
+  return res.json();
 }
 
 /* ---------- Main Component ---------- */
@@ -75,8 +97,11 @@ export default function ProfileEditPage() {
 
   const [authLoading, setAuthLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [showUploadModal, setShowUploadModal] = useState(false);
+  const profileId = Array.isArray(id) ? id[0] : id ?? "";
 
   const [master, setMaster] = useState<ProfileMaster | null>(null);
+  const [masterWithTemp, setMasterWithTemp] = useState<ProfileMasterWithTemp | null>(null);
   const [education, setEducation] = useState<PfEducation[]>([]);
   const [work, setWork] = useState<PfWork[]>([]);
 
@@ -94,14 +119,10 @@ export default function ProfileEditPage() {
   const [saving, setSaving] = useState(false);
 
   // Modal states
-  const [modal, setModal] = useState<{ open: boolean; title: string; message: string }>({
-    open: false,
-    title: "",
-    message: "",
-  });
-
+  const [modal, setModal] = useState({ open: false, title: "", message: "" });
+  const [removePhotoModal, setRemovePhotoModal] = useState(false);
   const [confirmReturn, setConfirmReturn] = useState(false);
-
+    
   /* ---------- Auth Check ---------- */
   useEffect(() => {
     if (!loading) {
@@ -122,15 +143,11 @@ export default function ProfileEditPage() {
         const data = await res.json();
 
         setMaster(data.master);
+        setMasterWithTemp(data.master); 
         setEducation(data.education);
         setWork(data.work);
-      } catch (err) {
-        console.error(err);
-        setModal({
-          open: true,
-          title: "Error",
-          message: "Failed to fetch profile data.",
-        });
+      } catch {
+        setModal({ open: true, title: "Error", message: "Failed to fetch profile data." });
       }
     }
 
@@ -139,7 +156,7 @@ export default function ProfileEditPage() {
 
   /* ---------- Save Handler ---------- */
   const handleSave = async () => {
-    if (!master) return;
+    if (!master || !masterWithTemp) return;
 
     if (!master.name || !master.pf_name) {
       setModal({
@@ -179,6 +196,21 @@ export default function ProfileEditPage() {
 
     setSaving(true);
     try {
+      // 1) commit temp photo first
+      if (masterWithTemp.temp_photo_id) {
+        const result = await commitPhoto(Number(id), masterWithTemp.temp_photo_id);
+
+        // update DB master
+        master.photo_path = result.photo_path
+        setMaster(prev => prev ? { ...prev, photo_path: result.photo_path } : prev);
+
+        // clear temp
+        setMasterWithTemp(prev =>
+          prev ? { ...prev, photo_path: result.photo_path, temp_photo_id: null } : prev
+        );
+      }
+
+      // 2) save profile
       const res = await fetch(`/api/profiles/${id}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -208,19 +240,17 @@ export default function ProfileEditPage() {
     }
   };
 
-  /* ---------- Return Handler ---------- */
-  const handleReturn = () => {
-    setConfirmReturn(true);
-  };
-
-  const confirmReturnAction = () => {
-    router.push("/profiles");
-  };
-
   /* ---------- UI ---------- */
   if (authLoading) return <p>Checking auth...</p>;
   if (!isAdmin) return <p>Unauthorized</p>;
-  if (!master) return <p>Loading profile...</p>;
+  if (!master || !masterWithTemp) return <p>Loading...</p>;
+
+  const currentPhotoSrc = 
+    masterWithTemp?.temp_photo_id
+      ? `/api/profiles/profile-photo/tmp/${masterWithTemp.temp_photo_id}`
+      : master?.photo_path
+        ? `/api/profiles/profile-photo/${profileId}`
+        : null;
 
   return (
     <div style={{ maxWidth: 900, margin: "0 auto", padding: 20 }}>
@@ -269,17 +299,39 @@ export default function ProfileEditPage() {
           </label>
 
           <label style={labelStyle}>
-            Photo URL
-            <input style={inputStyle} value={master.photo_path} onChange={(e) => setMaster({ ...master, photo_path: e.target.value })} />
+            Photo
+                    <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+          <div style={{ width: 96, height: 96, borderRadius: 6, overflow: "hidden", border: "1px solid #ddd" }}>
+
+            {currentPhotoSrc ? (
+              <img src={currentPhotoSrc} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+            ) : (
+              <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "#888" }}>
+                No photo
+              </div>
+            )}
+          </div>
+
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                <button style={{ ...buttonStyle }} onClick={() => setShowUploadModal(true)}>
+                  Upload / Replace
+                </button>
+                <button style={{ ...buttonStyle }} onClick={() => setRemovePhotoModal(true)}>
+                  Remove Photo
+                </button>
+              </div>
+            </div>
           </label>
 
           <label style={labelStyle}>
-            Is public?
-            <input
-              type="checkbox"
-              checked={master.is_public}
-              onChange={(e) => setMaster({ ...master, is_public: e.target.checked })}
-            />
+            <span>
+              Is public?{" "}
+              <input
+                type="checkbox"
+                checked={master.is_public}
+                onChange={(e) => setMaster({ ...master, is_public: e.target.checked })}
+              />
+            </span>
           </label>
         </div>
 
@@ -370,19 +422,52 @@ export default function ProfileEditPage() {
         <button style={buttonStyle} onClick={handleSave} disabled={saving}>
           Save
         </button>
-        <button style={buttonStyle} onClick={handleReturn}>
+        <button style={buttonStyle} onClick={() => {setConfirmReturn(true);}}>
           Return
         </button>
       </div>
 
       {/* ---------- Modals ---------- */}
+      <UploadPhotoModal
+        open={showUploadModal}
+        profileId={profileId}
+        onClose={() => setShowUploadModal(false)}
+        onUploaded={(temp_id) => {
+          setMasterWithTemp((prev) => prev ? { ...prev, temp_photo_id: temp_id } : null)
+        }}
+      />
+
+      {/* Remove Photo button */}
+      <ConfirmModal
+        open={removePhotoModal}
+        title="Confirm Remove Photo"
+        message="Remove photo?"
+        labelClose="Cancel"
+        onClose={() => setRemovePhotoModal(false)}
+        labelConfirm="Confirm"
+        onConfirm={() => {
+          // Perform removal
+          setMaster(prev =>
+            prev ? { ...prev, photo_path: null } : prev
+          );
+          setMasterWithTemp(prev =>
+            prev ? { ...prev, photo_path: null, temp_photo_id: null } : prev
+          );
+          // Close modal after confirming
+          setRemovePhotoModal(false);
+        }}
+      />
+
+      {/* Save button */}
       <ConfirmModal
         open={modal.open}
         title={modal.title}
         message={modal.message}
+        labelClose="OK"
         onClose={() => setModal({ ...modal, open: false })}
       />
 
+      {/* Return button */}
       <ConfirmModal
         open={confirmReturn}
         title="Confirm Return"
@@ -390,8 +475,11 @@ export default function ProfileEditPage() {
         labelClose="Cancel"
         onClose={() => setConfirmReturn(false)}
         labelConfirm="Return"
-        onConfirm={confirmReturnAction}
+        onConfirm={() => {
+          router.push("/profiles");
+        }}
       />
+
     </div>
   );
 }
