@@ -8,12 +8,23 @@ export const mainShadow: React.CSSProperties = {
 };
 
 export const mainSection: React.CSSProperties = {
-  minWidth: 800,
+  minWidth: 1000,
   padding: "2rem",
   border: "1px solid #ccc",
   borderRadius: 8,
   boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
   backgroundColor: "#fff",
+};
+
+export const mainHeader: React.CSSProperties = {
+  fontWeight: 700, 
+  marginBottom: "1rem"
+};
+
+export const sectionHeader: React.CSSProperties = {
+  fontSize: 18, 
+  fontWeight: 600, 
+  marginBottom: "1rem"
 };
 
 /* ---------- Pop-up Form ---------- */

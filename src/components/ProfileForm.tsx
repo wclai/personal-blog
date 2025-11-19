@@ -3,7 +3,7 @@
 
 import { useState } from "react";
 import type { Profile } from "../types";
-import { popupShadow, popupForm, popupSection, inputStyle, checkboxStyle, buttonRow, buttonStyle, confirmButtonStyle } from "../styles/globalStyle";
+import { mainHeader, popupShadow, popupForm, popupSection, inputStyle, checkboxStyle, buttonRow, buttonStyle, confirmButtonStyle } from "../styles/globalStyle";
 
 interface ProfileFormProps {
   profile: Profile | null; // null for new profile
@@ -75,7 +75,7 @@ export default function ProfileForm({ profile, onSaved, onCancel }: ProfileFormP
           minWidth: 500,
         }}
       >
-        <h2 style={{ marginBottom: "1rem" }}>{profile ? "Edit Profile" : "New Profile"}</h2>
+        <h2 style={mainHeader}>{profile ? "Edit Profile" : "New Profile"}</h2>
         <div style={popupSection}>
           <input
             style={inputStyle}

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import MonthPicker from "./MonthPicker"; // Not used here, but kept import style consistent if you later want month-level
-import { labelStyle, inputStyle, sectionBox, buttonRow } from "../../styles/globalStyle";
+import { sectionHeader, labelStyle, inputStyle, sectionBox, buttonRow } from "../../styles/globalStyle";
 
 /* -----------------------------
    TypeScript Types
@@ -140,7 +140,7 @@ export default function CertificateSection({ initialRows, onChange }: Props) {
 
   return (
     <div style={{ ...sectionBox }}>
-      <h2 style={{ fontSize: 18, fontWeight: 600, marginBottom: 12 }}>Certificates</h2>
+      <h2 style={sectionHeader}>Certificates</h2>
 
       <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
         {rows

@@ -5,7 +5,11 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { useAuth } from "../../context/AuthContext";
 
-import { mainShadow, mainSection, labelStyle , inputStyle , sectionBox , buttonRow , buttonStyle } from "../../styles/globalStyle";
+import { 
+  mainShadow, mainSection, mainHeader, sectionHeader, 
+  labelStyle , inputStyle , sectionBox , 
+  buttonRow , buttonStyle, confirmButtonStyle 
+} from "../../styles/globalStyle";
 import { ConfirmModal } from "../../components/Modal";
 import UploadPhotoModal from "../../components/UploadPhoto";
 
@@ -325,7 +329,7 @@ export default function ProfileEditPage() {
       setModal({
         open: true,
         title: "Validation",
-        message: "Please check for any incorrect input.",
+        message: "Please check for any incomplete or incorrect input.",
       });
       return;
     }
@@ -430,14 +434,16 @@ export default function ProfileEditPage() {
     <div style={mainShadow}>
     
       <div style={mainSection}>
-        <h1 style={{ marginBottom: "1rem" }}>
+        <h1 style={mainHeader}>
           Edit Profile
         </h1>
-        <p style={{ marginBottom: "1rem", fontStyle: "italic" }}>Mandatory field(s) masked with <span style={{ color: "red", fontWeight: "bold" }}>*</span></p>
+        <p style={{ marginBottom: 16, fontSize: 14, color: "#555" }}>
+          Mandatory field(s) masked with <span style={{ color: "red", fontWeight: "bold" }}>*</span>
+        </p>
 
         {/* ---------- Master Section ---------- */}
         <section style={sectionBox}>
-          <h2 style={{ marginBottom: "1rem" }}>Profile</h2>
+          <h2 style={sectionHeader}>Profile</h2>
           <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
             <label style={labelStyle}>
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -512,7 +518,7 @@ export default function ProfileEditPage() {
         
         {/* ---------- Contact Section ---------- */}
         <section style={sectionBox}>
-          <h2 style={{ fontSize: 18, fontWeight: 600, marginBottom: 12 }}>Contact Information</h2>
+          <h2 style={sectionHeader}>Contact Information</h2>
           <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
             <span></span>
             <label style={labelStyle}>
@@ -673,11 +679,13 @@ export default function ProfileEditPage() {
           }}
         />
 
-        <p style={{ marginBottom: "1rem", fontStyle: "italic" }}>Mandatory field(s) masked with <span style={{ color: "red", fontWeight: "bold" }}>*</span></p>
+        <p style={{ marginBottom: 16, fontSize: 14, color: "#555" }}>
+          Mandatory field(s) masked with <span style={{ color: "red", fontWeight: "bold" }}>*</span>
+        </p>
         
         {/* ---------- Buttons ---------- */}
         <div style={buttonRow}>
-          <button style={buttonStyle} onClick={handleSave} disabled={saving}>
+          <button style={confirmButtonStyle} onClick={handleSave} disabled={saving}>
             Save
           </button>
           <button style={buttonStyle} onClick={() => {setConfirmReturn(true);}}>

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import MonthPicker from "./MonthPicker";
-import { labelStyle, inputStyle, sectionBox, buttonRow } from "../../styles/globalStyle";
+import { sectionHeader, labelStyle, inputStyle, sectionBox, buttonRow } from "../../styles/globalStyle";
 
 /* -----------------------------
    TypeScript Types
@@ -116,7 +116,7 @@ export default function SkillSection({ initialRows, onChange }: Props) {
 
   return (
     <div style={{ ...sectionBox }}>
-      <h2 style={{ fontSize: 18, fontWeight: 600, marginBottom: 12 }}>Skills</h2>
+      <h2 style={sectionHeader}>Skills</h2>
 
       <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
         {rows

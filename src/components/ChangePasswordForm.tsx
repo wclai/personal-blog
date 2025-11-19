@@ -2,7 +2,7 @@
 
 "use client";
 import { useState } from "react";
-import { popupShadow, popupForm, popupClose, popupSection, inputStyle, confirmButtonStyle, errorMessage } from "../styles/globalStyle";
+import { mainHeader, popupShadow, popupForm, popupClose, popupSection, inputStyle, confirmButtonStyle, errorMessage } from "../styles/globalStyle";
 
 export default function ChangePasswordForm() {
   const [isOpen, setIsOpen] = useState(false);
@@ -81,7 +81,7 @@ export default function ChangePasswordForm() {
               ×
             </button>
 
-            <h2 style={{ marginBottom: "1rem" }}>Change Password</h2>
+            <h2 style={mainHeader}>Change Password</h2>
 
             <form onSubmit={handleSubmit} 
               style={popupSection}>

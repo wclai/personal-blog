@@ -1,7 +1,7 @@
 // src/pages/index.tsx
 
 import { useAuth } from "../context/AuthContext";
-import { mainShadow, mainSection } from "../styles/globalStyle";
+import { mainShadow, mainSection, mainHeader } from "../styles/globalStyle";
 
 export default function HomePage() {
   const { user } = useAuth();
@@ -18,7 +18,7 @@ export default function HomePage() {
             textAlign: "center",
           }}
         >
-          <h1 style={{ marginBottom: "1rem" }}>Welcome to My Personal Blog</h1>
+          <h1 style={mainHeader}>Welcome to My Personal Blog</h1>
 
           {user ? (
             <p>Logged in as: {user.name || user.email}</p>

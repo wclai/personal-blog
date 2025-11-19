@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
-import { mainShadow, mainSection } from "../styles/globalStyle";
+import { mainShadow, mainSection, mainHeader } from "../styles/globalStyle";
 import ChangePasswordForm from "../components/ChangePasswordForm";
 
 export default function Dashboard() {
@@ -26,7 +26,7 @@ export default function Dashboard() {
   return (
     <div style={mainShadow}>
       <div style={mainSection}>
-        <h1 style={{ marginBottom: "1rem" }}>
+        <h1 style={mainHeader}>
           Dashboard
         </h1>
         <p>
