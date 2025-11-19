@@ -1,4 +1,4 @@
-// ProjectSection.tsx
+// src/components/profile/ProjectSection.tsx
 
 import { useState, useEffect, useRef } from "react";
 import MonthPicker from "./MonthPicker";

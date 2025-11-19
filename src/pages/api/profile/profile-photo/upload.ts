@@ -1,4 +1,5 @@
-// src/pages/api/profile/profile-photo/upload-temp.ts
+// src/pages/api/profile/profile-photo/upload.ts
+
 import type { NextApiRequest, NextApiResponse } from "next";
 import formidable from "formidable";
 import fs from "fs";

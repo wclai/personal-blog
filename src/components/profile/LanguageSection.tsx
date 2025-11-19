@@ -1,3 +1,5 @@
+// src/components/profile/LanguageSection.tsx
+
 import { useState, useEffect, useRef } from "react";
 import { labelStyle, inputStyle, sectionBox, buttonRow } from "../../styles/globalStyle";
 

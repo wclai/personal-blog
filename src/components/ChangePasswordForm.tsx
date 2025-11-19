@@ -1,6 +1,8 @@
-"use client";
+// src/components/ChangePasswordForm.tsx
 
+"use client";
 import { useState } from "react";
+import { popupShadow, popupForm, popupClose, popupSection, inputStyle, confirmButtonStyle, errorMessage } from "../styles/globalStyle";
 
 export default function ChangePasswordForm() {
   const [isOpen, setIsOpen] = useState(false);
@@ -57,105 +59,64 @@ export default function ChangePasswordForm() {
   return (
     <div>
       <button
+        style={confirmButtonStyle}
         onClick={toggleModal}
-        style={{
-          padding: "6px 12px",
-          backgroundColor: "#0070f3",
-          color: "#fff",
-          border: "none",
-          borderRadius: 4,
-          cursor: "pointer",
-        }}
       >
         Change Password
       </button>
 
       {isOpen && (
-        <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100vw",
-            height: "100vh",
-            backgroundColor: "rgba(0,0,0,0.5)",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            animation: "fadeIn 0.3s",
-            zIndex: 1000,
-          }}
-        >
+        <div style={popupShadow}>
           <div
             style={{
-              backgroundColor: "#fff",
-              padding: "2rem",
-              borderRadius: 8,
+              ... popupForm,
               minWidth: 320,
               maxWidth: 400,
-              boxShadow: "0 5px 15px rgba(0,0,0,0.3)",
-              position: "relative",
-              animation: "slideDown 0.3s",
             }}
           >
             <button
+              style={popupClose}
               onClick={toggleModal}
-              style={{
-                position: "absolute",
-                top: 10,
-                right: 10,
-                background: "transparent",
-                border: "none",
-                fontSize: 18,
-                cursor: "pointer",
-              }}
             >
               ×
             </button>
 
             <h2 style={{ marginBottom: "1rem" }}>Change Password</h2>
 
-            <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+            <form onSubmit={handleSubmit} 
+              style={popupSection}>
               <input
+                style={inputStyle}
                 type="password"
                 placeholder="Current password"
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
                 required
-                style={{ padding: "0.5rem", borderRadius: 4, border: "1px solid #ccc" }}
               />
               <input
+                style={inputStyle}
                 type="password"
                 placeholder="New password"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 required
-                style={{ padding: "0.5rem", borderRadius: 4, border: "1px solid #ccc" }}
               />
               <input
+                style={inputStyle}
                 type="password"
                 placeholder="Confirm new password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
-                style={{ padding: "0.5rem", borderRadius: 4, border: "1px solid #ccc" }}
               />
 
-              {error && <p style={{ color: "red", marginTop: 0 }}>{error}</p>}
-              {message && <p style={{ color: "green", marginTop: 0 }}>{message}</p>}
+              {error && <p style={errorMessage}>{error}</p>}
+              {message && <p>{message}</p>}
 
               <button
+                style={confirmButtonStyle}
                 type="submit"
                 disabled={loading}
-                style={{
-                  padding: "0.5rem",
-                  backgroundColor: "#0070f3",
-                  color: "#fff",
-                  border: "none",
-                  borderRadius: 4,
-                  cursor: "pointer",
-                  marginTop: "0.5rem",
-                }}
               >
                 {loading ? "Updating..." : "Update Password"}
               </button>

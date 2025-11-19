@@ -168,7 +168,7 @@ export default function WorkSection({ initialRows, onChange }: Props) {
   ------------------------------ */
 
   return (
-    <div style={{ ...sectionBox }}>
+    <div style={ sectionBox }>
       <h2 style={{ fontSize: 18, fontWeight: 600, marginBottom: 12 }}>Work Experience</h2>
 
       <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>

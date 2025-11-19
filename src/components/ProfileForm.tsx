@@ -3,6 +3,7 @@
 
 import { useState } from "react";
 import type { Profile } from "../types";
+import { popupShadow, popupForm, popupSection, inputStyle, checkboxStyle, buttonRow, buttonStyle, confirmButtonStyle } from "../styles/globalStyle";
 
 interface ProfileFormProps {
   profile: Profile | null; // null for new profile
@@ -66,99 +67,85 @@ export default function ProfileForm({ profile, onSaved, onCancel }: ProfileFormP
 
   return (
     <div
-      style={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        width: "100vw",
-        height: "100vh",
-        backgroundColor: "rgba(0,0,0,0.5)",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        zIndex: 1000,
-      }}
+      style={popupShadow}
     >
       <div
         style={{
-          backgroundColor: "#fff",
-          padding: 20,
-          borderRadius: 6,
-          minWidth: 300,
-          maxWidth: 600,
+          ... popupForm,
+          minWidth: 500,
         }}
       >
-        <h2>{profile ? "Edit Profile" : "New Profile"}</h2>
-
-        <input
-          type="text"
-          name="pf_name"
-          value={formData.pf_name}
-          onChange={handleChange}
-          placeholder="Profile Name"
-          style={{ display: "block", marginBottom: 5, width: "100%" }}
-        />
-        <input
-          type="text"
-          name="name"
-          value={formData.name}
-          onChange={handleChange}
-          placeholder="Full Name"
-          style={{ display: "block", marginBottom: 5, width: "100%" }}
-        />
-        <input
-          type="text"
-          name="job_title"
-          value={formData.job_title}
-          onChange={handleChange}
-          placeholder="Job Title"
-          style={{ display: "block", marginBottom: 5, width: "100%" }}
-        />
-        <input
-          type="text"
-          name="tagline"
-          value={formData.tagline}
-          onChange={handleChange}
-          placeholder="Tagline"
-          style={{ display: "block", marginBottom: 5, width: "100%" }}
-        />
-        <input
-          type="text"
-          name="location"
-          value={formData.location}
-          onChange={handleChange}
-          placeholder="Location"
-          style={{ display: "block", marginBottom: 5, width: "100%" }}
-        />
-        <label style={{ display: "block", marginBottom: 5 }}>
+        <h2 style={{ marginBottom: "1rem" }}>{profile ? "Edit Profile" : "New Profile"}</h2>
+        <div style={popupSection}>
           <input
-            type="checkbox"
-            name="is_public"
-            checked={formData.is_public}
+            style={inputStyle}
+            type="text"
+            name="pf_name"
+            value={formData.pf_name}
             onChange={handleChange}
-          />{" "}
-          Public
-        </label>
+            placeholder="Profile Name"
+          />
+          <input
+            style={inputStyle}
+            type="text"
+            name="name"
+            value={formData.name}
+            onChange={handleChange}
+            placeholder="Full Name"
+          />
+          <input
+            style={inputStyle}
+            type="text"
+            name="job_title"
+            value={formData.job_title}
+            onChange={handleChange}
+            placeholder="Job Title"
+          />
+          <input
+            style={inputStyle}
+            type="text"
+            name="tagline"
+            value={formData.tagline}
+            onChange={handleChange}
+            placeholder="Tagline"
+          />
+          <input
+            style={inputStyle}
+            type="text"
+            name="location"
+            value={formData.location}
+            onChange={handleChange}
+            placeholder="Location"
+          />
+          <label style={checkboxStyle}>
+            <input
+              type="checkbox"
+              name="is_public"
+              checked={formData.is_public}
+              onChange={handleChange}
+            />
+              Go public
+          </label>
+        </div>
 
-        <div style={{ marginTop: 10, textAlign: "right" }}>
+        <div
+          style={{
+            ... buttonRow,
+            justifyContent: "flex-end",
+          }}
+        >
           <button
-            onClick={handleSave}
-            disabled={saving}
-            style={{ padding: "6px 12px", marginRight: 10 }}
-          >
-            {saving ? "Saving..." : "Save"}
-          </button>
-          <button
+            style={buttonStyle}
             onClick={handleCancel}
-            style={{
-              padding: "6px 12px",
-              backgroundColor: "#f44336",
-              color: "white",
-              border: "none",
-              borderRadius: 4,
-            }}
           >
             Cancel
+          </button>
+          <button
+            style={confirmButtonStyle}
+            onClick={handleSave}
+            disabled={saving}
+          >
+            {saving ? "Saving..." : "Save"}
           </button>
         </div>
       </div>

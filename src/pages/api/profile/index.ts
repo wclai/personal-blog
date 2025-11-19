@@ -11,7 +11,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       if (isPublicRequest) {
         // Public visitors: return only public profiles, no auth required
         const result = await pool.query(
-          "SELECT * FROM profile WHERE is_delete = false AND is_public = true ORDER BY id"
+          "SELECT * FROM profile WHERE is_deleted = false AND is_public = true ORDER BY id"
         );
         return res.status(200).json(result.rows);
       }
@@ -22,8 +22,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       const query =
         user.role === "admin"
-          ? "SELECT * FROM profile WHERE is_delete = false ORDER BY id"
-          : "SELECT * FROM profile WHERE is_delete = false AND is_public = true ORDER BY id";
+          ? "SELECT * FROM profile WHERE is_deleted = false ORDER BY id"
+          : "SELECT * FROM profile WHERE is_deleted = false AND is_public = true ORDER BY id";
 
       const result = await pool.query(query);
       return res.status(200).json(result.rows);

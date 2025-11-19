@@ -1,6 +1,8 @@
 // src/components/UploadPhoto.tsx
+
 "use client";
 import React, { useState } from "react";
+import { popupShadow, popupForm, popupSection, buttonRow, buttonStyle, confirmButtonStyle, errorMessage } from "../styles/globalStyle";
 
 export default function UploadPhoto({
   open,
@@ -49,7 +51,7 @@ export default function UploadPhoto({
       const formData = new FormData();
       formData.append("file", file);
 
-      const res = await fetch("/api/profile/profile-photo/upload-temp", {
+      const res = await fetch("/api/profile/profile-photo/upload", {
         method: "POST",
         body: formData,
         credentials: "include",
@@ -72,26 +74,16 @@ export default function UploadPhoto({
   };
 
   return (
-    <div style={{
-      position: "fixed",
-      inset: 0,
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-      background: "rgba(0,0,0,0.4)",
-      zIndex: 1200,
-    }}>
+    <div style={popupShadow}>
       <div style={{
-        width: 440,
-        background: "white",
-        borderRadius: 8,
-        padding: 20,
-        boxShadow: "0 8px 24px rgba(0,0,0,0.25)"
+        ... popupForm,
+        width: 480,
       }}>
-        <h3 style={{ margin: 0 }}>Upload Profile Photo</h3>
+        <h3 style={{ marginBottom: "1rem" }}>Upload Profile Photo</h3>
 
         <div style={{ marginTop: 12 }}>
           <input
+            style={{ marginBottom: "1rem" }}
             type="file"
             accept="image/png,image/jpeg,image/webp"
             onChange={(e) =>
@@ -99,7 +91,7 @@ export default function UploadPhoto({
             }
           />
         </div>
-        <p className="text-sm text-gray-500 mt-1">
+        <p>
           <span style={{ fontStyle: "italic" }}>
             Accepted: JPG / PNG / WebP • Max size: 2 MB
           </span>
@@ -117,10 +109,11 @@ export default function UploadPhoto({
           </div>
         )}
 
-        {error && <div style={{ color: "red", marginTop: 10 }}>{error}</div>}
+        {error && <div style={ errorMessage }>{error}</div>}
 
-        <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 16 }}>
+        <div style={{ ... buttonRow, justifyContent: "flex-end" }}>
           <button
+            style={buttonStyle}
             onClick={() => { setFile(null); setPreview(null); onClose(); }}
             disabled={uploading}
           >
@@ -128,8 +121,8 @@ export default function UploadPhoto({
           </button>
 
           <button
+            style={confirmButtonStyle}  
             onClick={doUpload}
-            style={{ padding: "8px 12px", background: uploading ? "#999" : "#0284c7", color: "white", border: "none", borderRadius: 6 }}
             disabled={uploading}
           >
             {uploading ? "Uploading..." : "Upload"}

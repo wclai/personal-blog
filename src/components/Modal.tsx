@@ -1,7 +1,7 @@
 
 // src/components/Modal.tsx
 import React from "react";
-import { buttonStyle } from "../styles/globalStyle";
+import { popupShadow, popupForm, buttonStyle, buttonRow } from "../styles/globalStyle";
 
 interface ModalAction {
   label: string;
@@ -22,23 +22,10 @@ export function Modal({
 
   return (
     <div
-      style={{
-        position: "fixed",
-        inset: 0,
-        background: "rgba(0,0,0,0.4)",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        zIndex: 1000,
-      }}
+      style={popupShadow}
     >
       <div
-        style={{
-          background: "white",
-          padding: 20,
-          borderRadius: 6,
-          width: 360,
-        }}
+        style={popupForm}
       >
         {children}
 
@@ -46,10 +33,8 @@ export function Modal({
         {actions.length > 0 && (
           <div
             style={{
-              marginTop: 20,
-              display: "flex",
+              ... buttonRow,
               justifyContent: "flex-end",
-              gap: 10,
             }}
           >
             {actions.map((btn, i) => (

@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { useAuth } from "../../context/AuthContext";
 
-import { labelStyle , inputStyle , sectionBox , buttonRow , buttonStyle } from "../../styles/globalStyle";
+import { mainShadow, mainSection, labelStyle , inputStyle , sectionBox , buttonRow , buttonStyle } from "../../styles/globalStyle";
 import { ConfirmModal } from "../../components/Modal";
 import UploadPhotoModal from "../../components/UploadPhoto";
 
@@ -427,91 +427,92 @@ export default function ProfileEditPage() {
         : null;
 
   return (
-    <div style={{ maxWidth: 900, margin: "0 auto", padding: 20 }}>
-      <h1>Edit Profile</h1>
+    <div style={mainShadow}>
+    
+      <div style={mainSection}>
+        <h1 style={{ marginBottom: "1rem" }}>
+          Edit Profile
+        </h1>
+        <p style={{ marginBottom: "1rem", fontStyle: "italic" }}>Mandatory field(s) masked with <span style={{ color: "red", fontWeight: "bold" }}>*</span></p>
 
-      {/* ---------- Master Section ---------- */}
-      <section style={sectionBox}>
-        <h2>Profile</h2>
-        <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-          <label style={labelStyle}>
-            <span style={{ fontStyle: "italic" }}>Mandatory field(s) masked with <span style={{ color: "red", fontWeight: "bold" }}>*</span></span>
-          </label>
-
-          <label style={labelStyle}>
-            <span>Profile Name<span style={{ color: "red", fontWeight: "bold" }}> *</span></span>
-            <input style={inputStyle} value={master.pf_name} onChange={(e) => setMaster({ ...master, pf_name: e.target.value })} />
-          </label>
-
-          <label style={labelStyle}>
-            <span>Full Name<span style={{ color: "red", fontWeight: "bold" }}> *</span></span>
-            <input style={inputStyle} value={master.name} onChange={(e) => setMaster({ ...master, name: e.target.value })} />
-          </label>
-
-          <label style={labelStyle}>
-            Job Title
-            <input style={inputStyle} value={master.job_title} onChange={(e) => setMaster({ ...master, job_title: e.target.value })} />
-          </label>
-
-          <label style={labelStyle}>
-            Tagline
-            <input style={inputStyle} value={master.tagline} onChange={(e) => setMaster({ ...master, tagline: e.target.value })} />
-          </label>
-
-          <label style={labelStyle}>
-            Location
-            <input style={inputStyle} value={master.location} onChange={(e) => setMaster({ ...master, location: e.target.value })} />
-          </label>
-
-          <label style={labelStyle}>
-            Introduction
-            <textarea
-              style={{ ...inputStyle, height: 80 }}
-              value={master.introduction ?? ""}
-              onChange={(e) => setMaster({ ...master, introduction: e.target.value })}
-            />
-          </label>
-
-          <label style={labelStyle}>
-            Photo
-                    <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-          <div style={{ width: 96, height: 96, borderRadius: 6, overflow: "hidden", border: "1px solid #ddd" }}>
-
-            {currentPhotoSrc ? (
-              <img src={currentPhotoSrc} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-            ) : (
-              <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "#888" }}>
-                No photo
+        {/* ---------- Master Section ---------- */}
+        <section style={sectionBox}>
+          <h2 style={{ marginBottom: "1rem" }}>Profile</h2>
+          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            <label style={labelStyle}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <input
+                  type="checkbox"
+                  checked={master.is_public}
+                  onChange={(e) => setMaster({ ...master, is_public: e.target.checked })}
+                />
+                {"  "}This profile will go public
               </div>
-            )}
-          </div>
+            </label>
+            
+            <label style={labelStyle}>
+              <span>Profile Name<span style={{ color: "red", fontWeight: "bold" }}> *</span></span>
+              <input style={inputStyle} value={master.pf_name} onChange={(e) => setMaster({ ...master, pf_name: e.target.value })} />
+            </label>
 
-              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                <button style={{ ...buttonStyle }} onClick={() => setShowUploadModal(true)}>
-                  Upload / Replace
-                </button>
-                <button style={{ ...buttonStyle }} onClick={() => setRemovePhotoModal(true)}>
-                  Remove Photo
-                </button>
-              </div>
-            </div>
-          </label>
+            <label style={labelStyle}>
+              <span>Full Name<span style={{ color: "red", fontWeight: "bold" }}> *</span></span>
+              <input style={inputStyle} value={master.name} onChange={(e) => setMaster({ ...master, name: e.target.value })} />
+            </label>
 
-          <label style={labelStyle}>
-            <span>
-              Is public?{" "}
-              <input
-                type="checkbox"
-                checked={master.is_public}
-                onChange={(e) => setMaster({ ...master, is_public: e.target.checked })}
+            <label style={labelStyle}>
+              Job Title
+              <input style={inputStyle} value={master.job_title} onChange={(e) => setMaster({ ...master, job_title: e.target.value })} />
+            </label>
+
+            <label style={labelStyle}>
+              Tagline
+              <input style={inputStyle} value={master.tagline} onChange={(e) => setMaster({ ...master, tagline: e.target.value })} />
+            </label>
+
+            <label style={labelStyle}>
+              Location
+              <input style={inputStyle} value={master.location} onChange={(e) => setMaster({ ...master, location: e.target.value })} />
+            </label>
+
+            <label style={labelStyle}>
+              Introduction
+              <textarea
+                style={{ ...inputStyle, height: 80 }}
+                value={master.introduction ?? ""}
+                onChange={(e) => setMaster({ ...master, introduction: e.target.value })}
               />
-            </span>
-          </label>
-        </div>
+            </label>
 
-        {/* Contact */}
-        <div style={{ marginTop: 20 }}>
-          <h3>Contact Information</h3>
+            <label style={labelStyle}>
+              Photo
+              <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+                <div style={{ width: 96, height: 96, borderRadius: 6, overflow: "hidden", border: "1px solid #ddd" }}>
+                  {currentPhotoSrc ? (
+                    <img src={currentPhotoSrc} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                  ) : (
+                    <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "#888" }}>
+                      No photo
+                    </div>
+                  )}
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                  <button style={buttonStyle} onClick={() => setShowUploadModal(true)}>
+                    Upload / Replace
+                  </button>
+                  <button style={buttonStyle} onClick={() => setRemovePhotoModal(true)}>
+                    Remove Photo
+                  </button>
+                </div>
+              </div>
+            </label>
+
+          </div>
+        </section>
+        
+        {/* ---------- Contact Section ---------- */}
+        <section style={sectionBox}>
+          <h2 style={{ fontSize: 18, fontWeight: 600, marginBottom: 12 }}>Contact Information</h2>
           <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
             <span></span>
             <label style={labelStyle}>
@@ -550,196 +551,194 @@ export default function ProfileEditPage() {
               />
             </label>
           </div>
+        </section>
+
+        {/* ---------- Education Section ---------- */}
+        <EducationSection
+          initialRows={education}
+          onChange={(packet) => {
+            const normalized = {
+              ...packet,
+              upserts: packet.upserts.map((r) => ({
+                ...r,
+                profile_id: Number(id),
+              })),
+            };
+            setEducationPayload(normalized);
+          }}
+        />
+
+        {/* ---------- Work Section ---------- */}
+        <WorkSection
+          initialRows={work}
+          onChange={(packet) => {
+            const normalized = {
+              ...packet,
+              upserts: packet.upserts.map((r) => ({
+                ...r,
+                profile_id: Number(id),
+              })),
+            };
+            setWorkPayload(normalized);
+          }}
+        />
+        
+        {/* ---------- Language Section ---------- */}
+        <LanguageSection
+          initialRows={language}
+          onChange={(packet) => {
+            const normalized = {
+              ...packet,
+              upserts: packet.upserts.map((r) => ({
+                ...r,
+                profile_id: Number(id),
+              })),
+            };
+            setLanguagePayload(normalized);
+          }}
+        />
+
+        {/* ---------- Skill Section ---------- */}
+        <SkillSection
+          initialRows={skill}
+          onChange={(packet) => {
+            const normalized = {
+              ...packet,
+              upserts: packet.upserts.map((r) => ({
+                ...r,
+                profile_id: Number(id),
+              })),
+            };
+            setSkillPayload(normalized);
+          }}
+        />
+
+        {/* ---------- Certificate Section ---------- */}
+        <CertificateSection
+          initialRows={certificate}
+          onChange={(packet) => {
+            const normalized = {
+              ...packet,
+              upserts: packet.upserts.map((r) => ({
+                ...r,
+                profile_id: Number(id),
+              })),
+            };
+            setCertificatePayload(normalized);
+          }}
+        />
+
+        {/* ---------- Project Section ---------- */}
+        <ProjectSection
+          initialRows={project}
+          onChange={(packet) => { 
+            const normalized = {
+              ...packet,
+              upserts: packet.upserts.map((r) => ({
+                ...r,
+                profile_id: Number(id),
+              })),
+            };
+            setProjectPayload(normalized);
+          }}
+        />
+
+        {/* ---------- Volunteer Section ---------- */}
+        <VolunteerSection
+          initialRows={volunteer}
+          onChange={(packet) => {
+            const normalized = {
+              ...packet,
+              upserts: packet.upserts.map((r) => ({
+                ...r,
+                profile_id: Number(id),
+              })),
+            };
+            setVolunteerPayload(normalized);
+          }}
+        />
+
+        {/* ---------- Social Link Section ---------- */}
+        <SocialLinkSection
+          initialRows={socialLink}
+          onChange={(packet) => {
+            const normalized = {
+              ...packet,
+              upserts: packet.upserts.map((r) => ({
+                ...r,
+                profile_id: Number(id),
+              })),
+            };
+            setSocialLinkPayload(normalized);
+          }}
+        />
+
+        <p style={{ marginBottom: "1rem", fontStyle: "italic" }}>Mandatory field(s) masked with <span style={{ color: "red", fontWeight: "bold" }}>*</span></p>
+        
+        {/* ---------- Buttons ---------- */}
+        <div style={buttonRow}>
+          <button style={buttonStyle} onClick={handleSave} disabled={saving}>
+            Save
+          </button>
+          <button style={buttonStyle} onClick={() => {setConfirmReturn(true);}}>
+            Return
+          </button>
         </div>
-      </section>
 
-      {/* ---------- Education Section ---------- */}
-      <EducationSection
-        initialRows={education}
-        onChange={(packet) => {
-          const normalized = {
-            ...packet,
-            upserts: packet.upserts.map((r) => ({
-              ...r,
-              profile_id: Number(id),
-            })),
-          };
-          setEducationPayload(normalized);
-        }}
-      />
+        {/* ---------- Modals ---------- */}
+        <UploadPhotoModal
+          open={showUploadModal}
+          profileId={profileId}
+          onClose={() => setShowUploadModal(false)}
+          onUploaded={(temp_id) => {
+            setMasterWithTemp((prev) => prev ? { ...prev, temp_photo_id: temp_id } : null)
+          }}
+        />
 
-      {/* ---------- Work Section ---------- */}
-      <WorkSection
-        initialRows={work}
-        onChange={(packet) => {
-          const normalized = {
-            ...packet,
-            upserts: packet.upserts.map((r) => ({
-              ...r,
-              profile_id: Number(id),
-            })),
-          };
-          setWorkPayload(normalized);
-        }}
-      />
-      
-      {/* ---------- Language Section ---------- */}
-      <LanguageSection
-        initialRows={language}
-        onChange={(packet) => {
-          const normalized = {
-            ...packet,
-            upserts: packet.upserts.map((r) => ({
-              ...r,
-              profile_id: Number(id),
-            })),
-          };
-          setLanguagePayload(normalized);
-        }}
-      />
+        {/* Remove Photo button */}
+        <ConfirmModal
+          open={removePhotoModal}
+          title="Confirm Remove Photo"
+          message="Remove photo?"
+          labelClose="Cancel"
+          onClose={() => setRemovePhotoModal(false)}
+          labelConfirm="Confirm"
+          onConfirm={() => {
+            // Perform removal
+            setMaster(prev =>
+              prev ? { ...prev, photo_path: null } : prev
+            );
+            setMasterWithTemp(prev =>
+              prev ? { ...prev, photo_path: null, temp_photo_id: null } : prev
+            );
+            // Close modal after confirming
+            setRemovePhotoModal(false);
+          }}
+        />
 
-      {/* ---------- Skill Section ---------- */}
-      <SkillSection
-        initialRows={skill}
-        onChange={(packet) => {
-          const normalized = {
-            ...packet,
-            upserts: packet.upserts.map((r) => ({
-              ...r,
-              profile_id: Number(id),
-            })),
-          };
-          setSkillPayload(normalized);
-        }}
-      />
+        {/* Save button */}
+        <ConfirmModal
+          open={modal.open}
+          title={modal.title}
+          message={modal.message}
+          labelClose="OK"
+          onClose={() => setModal({ ...modal, open: false })}
+        />
 
-      {/* ---------- Certificate Section ---------- */}
-      <CertificateSection
-        initialRows={certificate}
-        onChange={(packet) => {
-          const normalized = {
-            ...packet,
-            upserts: packet.upserts.map((r) => ({
-              ...r,
-              profile_id: Number(id),
-            })),
-          };
-          setCertificatePayload(normalized);
-        }}
-      />
+        {/* Return button */}
+        <ConfirmModal
+          open={confirmReturn}
+          title="Confirm Return"
+          message="Please remember to save before leaving. Are you sure you want to return?"
+          labelClose="Cancel"
+          onClose={() => setConfirmReturn(false)}
+          labelConfirm="Return"
+          onConfirm={() => {
+            router.push("/profile");
+          }}
+        />
 
-      {/* ---------- Project Section ---------- */}
-      <ProjectSection
-        initialRows={project}
-        onChange={(packet) => { 
-          const normalized = {
-            ...packet,
-            upserts: packet.upserts.map((r) => ({
-              ...r,
-              profile_id: Number(id),
-            })),
-          };
-          setProjectPayload(normalized);
-        }}
-      />
-
-      {/* ---------- Volunteer Section ---------- */}
-      <VolunteerSection
-        initialRows={volunteer}
-        onChange={(packet) => {
-          const normalized = {
-            ...packet,
-            upserts: packet.upserts.map((r) => ({
-              ...r,
-              profile_id: Number(id),
-            })),
-          };
-          setVolunteerPayload(normalized);
-        }}
-      />
-
-      {/* ---------- Social Link Section ---------- */}
-      <SocialLinkSection
-        initialRows={socialLink}
-        onChange={(packet) => {
-          const normalized = {
-            ...packet,
-            upserts: packet.upserts.map((r) => ({
-              ...r,
-              profile_id: Number(id),
-            })),
-          };
-          setSocialLinkPayload(normalized);
-        }}
-      />
-
-      <label style={labelStyle}>
-        <span style={{ fontStyle: "italic" }}>Mandatory field(s) masked with <span style={{ color: "red", fontWeight: "bold" }}>*</span></span>
-      </label>
-      
-      {/* ---------- Buttons ---------- */}
-      <div style={buttonRow}>
-        <button style={buttonStyle} onClick={handleSave} disabled={saving}>
-          Save
-        </button>
-        <button style={buttonStyle} onClick={() => {setConfirmReturn(true);}}>
-          Return
-        </button>
       </div>
-
-      {/* ---------- Modals ---------- */}
-      <UploadPhotoModal
-        open={showUploadModal}
-        profileId={profileId}
-        onClose={() => setShowUploadModal(false)}
-        onUploaded={(temp_id) => {
-          setMasterWithTemp((prev) => prev ? { ...prev, temp_photo_id: temp_id } : null)
-        }}
-      />
-
-      {/* Remove Photo button */}
-      <ConfirmModal
-        open={removePhotoModal}
-        title="Confirm Remove Photo"
-        message="Remove photo?"
-        labelClose="Cancel"
-        onClose={() => setRemovePhotoModal(false)}
-        labelConfirm="Confirm"
-        onConfirm={() => {
-          // Perform removal
-          setMaster(prev =>
-            prev ? { ...prev, photo_path: null } : prev
-          );
-          setMasterWithTemp(prev =>
-            prev ? { ...prev, photo_path: null, temp_photo_id: null } : prev
-          );
-          // Close modal after confirming
-          setRemovePhotoModal(false);
-        }}
-      />
-
-      {/* Save button */}
-      <ConfirmModal
-        open={modal.open}
-        title={modal.title}
-        message={modal.message}
-        labelClose="OK"
-        onClose={() => setModal({ ...modal, open: false })}
-      />
-
-      {/* Return button */}
-      <ConfirmModal
-        open={confirmReturn}
-        title="Confirm Return"
-        message="Please remember to save before leaving. Are you sure you want to return?"
-        labelClose="Cancel"
-        onClose={() => setConfirmReturn(false)}
-        labelConfirm="Return"
-        onConfirm={() => {
-          router.push("/profile");
-        }}
-      />
-
     </div>
   );
 }

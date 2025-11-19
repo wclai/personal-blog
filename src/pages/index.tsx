@@ -1,6 +1,7 @@
 // src/pages/index.tsx
+
 import { useAuth } from "../context/AuthContext";
-// Remove: import NavBar from "../components/NavBar";
+import { mainShadow, mainSection } from "../styles/globalStyle";
 
 export default function HomePage() {
   const { user } = useAuth();
@@ -9,20 +10,11 @@ export default function HomePage() {
     <>
       {/* NavBar already rendered by layout or _app.tsx, so remove duplicate */}
       <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          marginTop: "4rem",
-        }}
+        style={mainShadow}
       >
         <div
           style={{
-            width: 800,
-            padding: "2rem",
-            border: "1px solid #ccc",
-            borderRadius: 8,
-            boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
-            backgroundColor: "#fff",
+            ...mainSection,
             textAlign: "center",
           }}
         >

@@ -162,7 +162,7 @@ export default function VolunteerSection({ initialRows, onChange }: Props) {
 
   return (
     <div style={{ ...sectionBox }}>
-      <h2 style={{ fontSize: 18, fontWeight: 600, marginBottom: 12 }}>Volunteer Experience</h2>
+      <h2 style={{ fontSize: 18, fontWeight: 600, marginBottom: 12 }}>Volunteer Experience / Activities</h2>
 
       <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
         {rows
@@ -256,7 +256,7 @@ export default function VolunteerSection({ initialRows, onChange }: Props) {
                   checked={row.is_present}
                   onChange={e => updateField(index, "is_present", e.target.checked)}
                 />
-                <span style={{ fontSize: 14 }}>I am currently volunteering here</span>
+                <span style={{ fontSize: 14 }}>I am currently participating here</span>
               </div>
 
               {/* Description */}

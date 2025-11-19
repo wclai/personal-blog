@@ -12,7 +12,7 @@ export interface Profile {
   tagline?: string;
   photo_path?: string;
   is_public?: boolean;
-  is_delete?: boolean;
+  is_deleted?: boolean;
   created_at?: Timestamp;
   updated_at?: Timestamp;
 }

@@ -1,3 +1,5 @@
+// src/components/profile/EducationSection.tsx
+
 import { useState, useEffect, useRef } from "react";
 import MonthPicker from "./MonthPicker";
 import { labelStyle, inputStyle, sectionBox, buttonRow } from "../../styles/globalStyle";
@@ -147,7 +149,7 @@ export default function EducationSection({ initialRows, onChange }: Props) {
   ------------------------------ */
 
   return (
-    <div style={{ ...sectionBox }}>
+    <div style={sectionBox}>
       <h2 style={{ fontSize: 18, fontWeight: 600, marginBottom: 12 }}>Education</h2>
 
       <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
