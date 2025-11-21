@@ -270,7 +270,9 @@ export default function PortfolioProfilePage() {
                 <div className="-mt-16 mb-4">
                   <img
                     src={
-                      profile.photo_path ||
+                      profile?.photo_path
+                      ? `/api/profile/profile-photo/${profile.id}`
+                      : 
                       "https://placehold.co/128x128/eeeeee/000000?text=Profile"
                     }
                     alt={profile.name}
