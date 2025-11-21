@@ -1,4 +1,5 @@
 // src/pages/auth/login.tsx
+
 import { useState } from "react";
 import { useRouter } from "next/router";
 import { useAuth } from "../../context/AuthContext";
@@ -10,14 +11,29 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const success = await login(email, password);
-    if (success) {
+    setError("");
+    setLoading(true);
+
+    const result = await login(email, password);
+
+    setLoading(false);
+
+    if (result.success) {
       router.push("/dashboard");
+      return;
+    }
+
+    // Handle error cases from AuthContext.login()
+    if (result.errorCode === "ACCOUNT_INACTIVE") {
+      setError("Your account has not been activated yet. Please contact the administrator.");
+    } else if (result.errorCode === "INVALID_CREDENTIALS") {
+      setError("Invalid email or password.");
     } else {
-      setError("Invalid credentials");
+      setError(result.message || "Login failed. Please try again.");
     }
   };
 
@@ -75,16 +91,18 @@ export default function LoginPage() {
 
         <button
           type="submit"
+          disabled={loading}
           style={{
             padding: "10px",
             backgroundColor: "#4f46e5",
             color: "white",
             border: "none",
             borderRadius: 4,
-            cursor: "pointer",
+            cursor: loading ? "not-allowed" : "pointer",
+            opacity: loading ? 0.7 : 1,
           }}
         >
-          Login
+          {loading ? "Logging in..." : "Login"}
         </button>
       </form>
     </div>

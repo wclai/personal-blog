@@ -1,3 +1,5 @@
+// src/context/AuthContext.tsx
+
 "use client";
 import React, { createContext, useContext, useEffect, useState, ReactNode } from "react";
 
@@ -6,12 +8,19 @@ interface User {
   name: string;
   email: string;
   role?: string;
+  is_active?: boolean;
 }
+
+type LoginErrorCode = "INVALID_CREDENTIALS" | "ACCOUNT_INACTIVE" | "UNKNOWN_ERROR";
+
+type LoginResult =
+  | { success: true }
+  | { success: false; errorCode: LoginErrorCode; message: string };
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<boolean>;
+  login: (email: string, password: string) => Promise<LoginResult>;
   register: (name: string, email: string, password: string) => Promise<boolean>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
@@ -22,6 +31,13 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // helper: normalize /api/auth/me responses (either { user } or bare user)
+  const extractUser = (data: any): User | null => {
+    if (!data) return null;
+    if ("user" in data) return data.user || null;
+    return data; // assume data itself is the user object
+  };
 
   // Load user on mount
   useEffect(() => {
@@ -37,18 +53,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (!res.ok) {
           console.warn("Unexpected auth response:", res.status);
           setUser(null);
+          setLoading(false);
           return;
         }
         const data = await res.json();
-        // Make sure data is valid
-        /*if (!data || !data.id) {
-          setUser(null);
-        } else {
-          setUser(data); // only set if valid
-        }*/
-        setUser(data);  // data is either user or null 
+        setUser(extractUser(data));
       } catch (err) {
-        console.warn("Auth check skipped (visitor mode).");
+        console.warn("Auth check skipped (visitor mode).", err);
         setUser(null);
       } finally {
         setLoading(false);
@@ -58,18 +69,56 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     fetchUser();
   }, []);
 
-  const login = async (email: string, password: string) => {
-    const res = await fetch("/api/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    });
-    if (res.ok) {
-      const data = await res.json();
-      setUser(data.user);
-      return true;
+  const login = async (email: string, password: string): Promise<LoginResult> => {
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      let data: any = null;
+      try {
+        data = await res.json();
+      } catch {
+        data = null;
+      }
+
+      if (res.ok) {
+        // expect { user: {...}, success?: true }
+        if (data && data.user) {
+          setUser(data.user);
+        } else {
+          // fallback if API returns bare user
+          setUser(extractUser(data));
+        }
+        return { success: true };
+      }
+
+      // Not OK → read errorCode/message from backend
+      const errorCode: LoginErrorCode =
+        data?.errorCode === "ACCOUNT_INACTIVE" || data?.errorCode === "INVALID_CREDENTIALS"
+          ? data.errorCode
+          : "UNKNOWN_ERROR";
+
+      const message: string =
+        typeof data?.message === "string" && data.message.trim().length > 0
+          ? data.message
+          : "Login failed";
+
+      return {
+        success: false,
+        errorCode,
+        message,
+      };
+    } catch (err) {
+      console.error("Login request failed", err);
+      return {
+        success: false,
+        errorCode: "UNKNOWN_ERROR",
+        message: "Network error. Please try again.",
+      };
     }
-    return false;
   };
 
   const register = async (name: string, email: string, password: string) => {
@@ -92,11 +141,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const refreshUser = async () => {
-    const res = await fetch("/api/auth/me");
-    if (res.ok) {
+    try {
+      const res = await fetch("/api/auth/me", { credentials: "include" });
+      if (!res.ok) {
+        setUser(null);
+        return;
+      }
       const data = await res.json();
-      setUser(data.user);
-    } else {
+      setUser(extractUser(data));
+    } catch {
       setUser(null);
     }
   };

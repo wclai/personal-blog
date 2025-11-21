@@ -8,7 +8,8 @@ export const mainShadow: React.CSSProperties = {
 };
 
 export const mainSection: React.CSSProperties = {
-  minWidth: 1000,
+  width: "clamp(500px, 80vw, 1000px)",
+  margin: "0 auto",
   padding: "2rem",
   border: "1px solid #ccc",
   borderRadius: 8,

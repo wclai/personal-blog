@@ -10,8 +10,8 @@ import {
   labelStyle,
   inputStyle,
   buttonRow,
-  buttonStyle,
-  confirmButtonStyle,
+  thStyle,
+  tdStyle,
 } from "../../styles/globalStyle";
 
 interface PublicProfileListItem {
@@ -64,11 +64,12 @@ const PortfolioPage: NextPage = () => {
     setQuery(initialQ);
     setPage(initialPage);
 
-    // If there is a query in URL, perform initial search
-    if (initialQ.trim()) {
+    const hasPageParam = typeof pageParam !== "undefined";
+
+    if (initialQ.trim() || hasPageParam) {
       performSearch(initialQ, initialPage);
     } else {
-      // No query → no search yet
+      // Only the true initial load (no q, no page) shows "No search yet"
       setHasSearched(false);
       setItems([]);
       setTotal(0);
@@ -374,23 +375,6 @@ const PortfolioPage: NextPage = () => {
       </div>
     </div>
   );
-};
-
-/* -----------------------------
-   Table Cell Styles
------------------------------- */
-
-const thStyle: React.CSSProperties = {
-  textAlign: "left",
-  padding: "10px 12px",
-  borderBottom: "1px solid #ddd",
-  whiteSpace: "nowrap",
-};
-
-const tdStyle: React.CSSProperties = {
-  padding: "8px 12px",
-  borderBottom: "1px solid #eee",
-  verticalAlign: "top",
 };
 
 export default PortfolioPage;

@@ -1,4 +1,5 @@
 // src/pages/api/profile/index.ts
+
 import type { NextApiRequest, NextApiResponse } from "next";
 import { pool } from "../../../lib/db";
 import { getUserFromRequest } from "../../../lib/auth";
@@ -32,7 +33,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (req.method === "POST") {
       const user = getUserFromRequest(req);
       if (!user) return res.status(401).json({ error: "Unauthorized" });
-      if (user.role !== "admin") return res.status(403).json({ error: "Forbidden" });
+      if (user.role !== "admin" && user.role !== "user") return res.status(403).json({ error: "Forbidden" });
 
       const { pf_name, name, job_title, location, tagline, is_public } = req.body;
 

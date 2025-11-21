@@ -34,8 +34,7 @@ export default function Dashboard() {
         </p>
 
         <p style={{ marginTop: "1rem" }}>
-          This is your dashboard. You can add portfolio items, write blog posts, and manage
-          your account here.
+          This is your dashboard. You can manage your account here.
         </p>
 
         {loading && <p>Loading your data...</p>}

@@ -41,14 +41,16 @@ export default function NavBar() {
           <Link href="/portfolio" style={{ marginRight: 15 }}>
             Portfolio
           </Link>
-          {user?.role === "admin" && (
+          {(user?.role === "admin" || user?.role === "user") && (
             <Link href="/profile" style={{ marginRight: 15 }}>
-              Admin
-            </Link>
+              Profile
+            </Link> 
           )}
-          <Link href="/blog" style={{ marginRight: 15 }}>
-            Blog
-          </Link>
+          {user?.role === "admin" && (
+            <Link href="/user/list" style={{ marginRight: 15 }}>
+              Admin
+            </Link>            
+          )}
         </div>
 
         {/* Right side: login info or login/register */}

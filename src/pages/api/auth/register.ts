@@ -16,8 +16,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const hashed = await bcrypt.hash(password, 10);
 
     const result = await pool.query(
-      "INSERT INTO users (name, email, password, role) VALUES ($1, $2, $3, $4) RETURNING id, name, email, role",
-      [name, email, hashed, "user"]
+      "INSERT INTO users (name, email, password, role, is_active) VALUES ($1, $2, $3, $4) RETURNING id, name, email, role",
+      [name, email, hashed, "user", false]
     );
 
     const user = result.rows[0];
