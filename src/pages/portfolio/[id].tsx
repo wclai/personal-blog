@@ -17,7 +17,8 @@ import {
   HeartHandshake,
   Loader2,
   Zap,
-  Share2
+  Share2,
+  Download,
 } from "lucide-react";
 
 // --- Types based on your DB/API schema ---
@@ -149,7 +150,8 @@ const initialData: FullProfileData = {
 
 export default function PortfolioProfilePage() {
   const router = useRouter();
-  const { id } = router.query;
+  const { id, pdf } = router.query;
+  const isPdfMode = pdf === "1";
 
   const [profileData, setProfileData] = useState<FullProfileData>(initialData);
   const [isLoading, setIsLoading] = useState(true);
@@ -257,6 +259,19 @@ export default function PortfolioProfilePage() {
     <div className="min-h-screen bg-slate-50 text-slate-800 font-sans selection:bg-blue-100">
       {/* Main Container */}
       <div className="max-w-7xl mx-auto p-4 md:p-8 lg:p-12">
+        {/* Top-right actions row */}
+      <div className="flex justify-end mb-4">
+        {!isPdfMode && (
+          <a
+            href={`/api/portfolio/${Array.isArray(id) ? id[0] : id}/pdf`}
+            className="inline-flex items-center gap-2 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 shadow-sm hover:border-blue-500 hover:text-blue-600 hover:shadow-md transition-all"
+          >
+            <Download className="w-4 h-4" />
+            <span>Download as PDF</span>
+          </a>
+        )}
+      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8"></div>
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* LEFT COLUMN: Static Profile Info */}
           <div className="lg:col-span-4 xl:col-span-3 space-y-6">
