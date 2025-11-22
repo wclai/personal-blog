@@ -39,4 +39,3 @@ networks:
 
 volumes:
   postgres_data:
-  - /home/ubuntu/profile_photos:/app/public/profile_photos
