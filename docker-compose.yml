@@ -26,11 +26,9 @@ services:
       NODE_ENV: production
       # match your DATABASE_URL with your database service name, user, password, host, port, and database name
       DATABASE_URL: postgres://postgres:postgres@db:5432/portfolio_db
-      NEXTAUTH_SECRET="dd88a4663489485272ec638830c6a352"
-      JWT_SECRET="dd88a4663489485272ec638830c6a352"
-      
-      # PROFILE_PHOTO_DIR=C:/Users/Paul Lai/Desktop/Coding/personal-blog/attachment/profile_photo
-      # COOKIE_NAME: auth_token
+      NEXTAUTH_SECRET: "dd88a4663489485272ec638830c6a352"
+      JWT_SECRET: "dd88a4663489485272ec638830c6a352"
+      PROFILE_PHOTO_DIR: /app/public/profile_photos
     ports:
       - "80:3000"
     networks:
@@ -41,3 +39,4 @@ networks:
 
 volumes:
   postgres_data:
+  - /home/ubuntu/profile_photos:/app/public/profile_photos
