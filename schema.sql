@@ -1,19 +1,7 @@
 
-CREATE DATABASE personal_blog WITH TEMPLATE = template0 ENCODING = 'UTF8' LOCALE_PROVIDER = libc LOCALE = 'Chinese (Traditional)_Hong Kong SAR.950';
+CREATE DATABASE personal_blog WITH TEMPLATE = template0 ENCODING = 'UTF8' LOCALE_PROVIDER = libc;
 
 ALTER DATABASE personal_blog OWNER TO postgres;
-
-SET statement_timeout = 0;
-SET lock_timeout = 0;
-SET idle_in_transaction_session_timeout = 0;
-SET transaction_timeout = 0;
-SET client_encoding = 'UTF8';
-SET standard_conforming_strings = on;
-SELECT pg_catalog.set_config('search_path', '', false);
-SET check_function_bodies = false;
-SET xmloption = content;
-SET client_min_messages = warning;
-SET row_security = off;
 
 --
 -- TOC entry 239 (class 1255 OID 16422)
@@ -836,8 +824,6 @@ ALTER TABLE ONLY public.profile
 --
 -- PostgreSQL database dump complete
 --
-
-\unrestrict Q2HH3YXwx600pYtcI00kDeXY5ffIRxq7IkMm1o5zaaghD3jsw4DkwGY7xTxH3Kq
 
 -- Completed on 2025-11-23 20:49:18
 
