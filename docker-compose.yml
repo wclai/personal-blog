@@ -25,7 +25,7 @@ services:
     environment:
       NODE_ENV: production
       # match your DATABASE_URL with your database service name, user, password, host, port, and database name
-      DATABASE_URL: postgres://postgres:postgres@db:5432/portfolio_db
+      DATABASE_URL: postgres://postgres:postgres@db:5432/personal_blog
       NEXTAUTH_SECRET: "dd88a4663489485272ec638830c6a352"
       JWT_SECRET: "dd88a4663489485272ec638830c6a352"
       PROFILE_PHOTO_DIR: /app/public/profile_photos
