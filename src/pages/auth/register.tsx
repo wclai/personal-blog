@@ -16,7 +16,7 @@ export default function RegisterPage() {
     e.preventDefault();
     const success = await register(name, email, password);
     if (success) {
-      router.push("/dashboard");
+      setError("Your registration request is received and being processed.");
     } else {
       setError("Registration failed");
     }
