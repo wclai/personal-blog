@@ -1,3 +1,6 @@
+More Information:
+https://medium.com/@wclai.paul/vibe-coding-%E7%B6%93%E9%A9%97%E5%88%86%E4%BA%AB-ef4954998142
+
 # 📘 Personal Portfolio CMS (Next.js + PostgreSQL)
 
 A full-stack web application for building and displaying professional public portfolios.  
