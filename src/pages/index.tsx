@@ -2,7 +2,7 @@
 
 import { useAuth } from "../context/AuthContext";
 import { mainShadow, mainSection, mainHeader } from "../styles/globalStyle";
-import AIAgent from "../components/AIAgent";
+import ChatBot from "../components/ChatBot";
 
 export default function HomePage() {
   const { user } = useAuth();
@@ -28,7 +28,7 @@ export default function HomePage() {
           )}
         </div>
       </div>
-      <AIAgent />
+      <ChatBot />
     </>
   );
 }
