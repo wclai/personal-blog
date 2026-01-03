@@ -2,6 +2,7 @@
 
 import { useAuth } from "../context/AuthContext";
 import { mainShadow, mainSection, mainHeader } from "../styles/globalStyle";
+import AIAgent from "../components/AIAgent";
 
 export default function HomePage() {
   const { user } = useAuth();
@@ -27,6 +28,7 @@ export default function HomePage() {
           )}
         </div>
       </div>
+      <AIAgent />
     </>
   );
 }
