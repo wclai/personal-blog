@@ -2,7 +2,7 @@
 
 import { useAuth } from "../context/AuthContext";
 import { mainShadow, mainSection, mainHeader } from "../styles/globalStyle";
-import ChatBot from "../components/ChatBot";
+import ChatBot from "../components/dify/ChatBot";
 
 export default function HomePage() {
   const { user } = useAuth();
