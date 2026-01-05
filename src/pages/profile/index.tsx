@@ -63,6 +63,13 @@ export default function ProfilePage() {
 
         const data = await res.json();
 
+        if (!data) {
+          setAuthUser(null);
+          setIsAdmin(false);
+          setAuthLoading(false);
+          return;
+        }
+        
         // assuming /api/auth/me returns { id, role, ... }
         const user: AuthUser = {
           id: data.id,
