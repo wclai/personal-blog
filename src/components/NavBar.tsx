@@ -2,6 +2,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { ConfirmModal } from "./Modal";
+import ChatBot from "../components/dify/ChatBot";
 
 export default function NavBar() {
   const { user, logout, loading } = useAuth();
@@ -59,6 +60,7 @@ export default function NavBar() {
             <span>Checking auth...</span> 
           ) : user ? (
               <>
+                <ChatBot />
                 <span style={{ marginRight: 10 }}>
                   Hi, {user.name || user.email}
                 </span>
@@ -77,6 +79,7 @@ export default function NavBar() {
               </>
             ) : (
               <>
+                <ChatBot />
                 <Link href="/auth/login" style={{ marginRight: 10 }}>Login</Link>
                 <Link href="/auth/register">Register</Link>
               </>

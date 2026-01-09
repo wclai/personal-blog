@@ -1,0 +1,18 @@
+#絕對不要把這寫進 Build Context
+
+node_modules
+.next
+.git
+.env*
+*.local
+
+#重點：無視 Dify 專案的所有內容
+
+dify/
+docker/volumes/
+
+#無視虛擬環境
+
+.venv
+venv
+pycache

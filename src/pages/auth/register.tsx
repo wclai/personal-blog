@@ -1,5 +1,5 @@
 // src/pages/auth/register.tsx
-import { useState } from "react";
+import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from "next/router";
 import { useAuth } from "../../context/AuthContext";
 import AiRegister from "../../components/dify/AiRegister";
@@ -23,6 +23,16 @@ export default function RegisterPage() {
     }
   };
 
+  /**
+   * 處理來自 AI 助手的成功事件
+   */
+  const handleAiSuccess = (message: string) => {
+    setError(message);
+    setName("");
+    setEmail("");
+    setPassword("");
+  };
+
   return (
     <>
       <div
@@ -40,9 +50,10 @@ export default function RegisterPage() {
         {error && (
           <p
             style={{
-              color: "red",
+              color: error.includes("received") ? "#10b981" : "red",
               marginBottom: "1rem",
               textAlign: "center",
+              fontWeight: "bold"
             }}
           >
             {error}
@@ -55,12 +66,7 @@ export default function RegisterPage() {
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            style={{
-              padding: "8px",
-              marginBottom: "1rem",
-              border: "1px solid #ccc",
-              borderRadius: 4,
-            }}
+            style={{ padding: "8px", marginBottom: "1rem", border: "1px solid #ccc", borderRadius: 4 }}
           />
 
           <label style={{ marginBottom: 5 }}>Email</label>
@@ -68,12 +74,7 @@ export default function RegisterPage() {
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            style={{
-              padding: "8px",
-              marginBottom: "1rem",
-              border: "1px solid #ccc",
-              borderRadius: 4,
-            }}
+            style={{ padding: "8px", marginBottom: "1rem", border: "1px solid #ccc", borderRadius: 4 }}
           />
 
           <label style={{ marginBottom: 5 }}>Password</label>
@@ -81,12 +82,7 @@ export default function RegisterPage() {
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            style={{
-              padding: "8px",
-              marginBottom: "1.5rem",
-              border: "1px solid #ccc",
-              borderRadius: 4,
-            }}
+            style={{ padding: "8px", marginBottom: "1.5rem", border: "1px solid #ccc", borderRadius: 4 }}
           />
 
           <button
@@ -104,7 +100,9 @@ export default function RegisterPage() {
           </button>
         </form>
       </div>
-      <AiRegister />
+
+      {/* 傳入 handleAiSuccess 函數 */}
+      <AiRegister onRegistrationSuccess={handleAiSuccess} />
     </>
   );
 }
