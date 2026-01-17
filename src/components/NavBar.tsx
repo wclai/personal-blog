@@ -8,6 +8,8 @@ export default function NavBar() {
   const { user, logout, loading } = useAuth();
   const [isModalOpen, setModalOpen] = useState(false);
   
+  const isDifyEnabled = process.env.NEXT_PUBLIC_ENABLE_DIFY === 'true';
+
   const handleLogout = () => {
     setModalOpen(true);
   };
@@ -60,7 +62,7 @@ export default function NavBar() {
             <span>Checking auth...</span> 
           ) : user ? (
               <>
-                <ChatBot />
+                {isDifyEnabled && <ChatBot />}
                 <span style={{ marginRight: 10 }}>
                   Hi, {user.name || user.email}
                 </span>
@@ -79,7 +81,7 @@ export default function NavBar() {
               </>
             ) : (
               <>
-                <ChatBot />
+                {isDifyEnabled && <ChatBot />}
                 <Link href="/auth/login" style={{ marginRight: 10 }}>Login</Link>
                 <Link href="/auth/register">Register</Link>
               </>

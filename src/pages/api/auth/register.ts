@@ -1,20 +1,40 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import bcrypt from "bcrypt";
-import { pool } from "../../../lib/db"; // your PostgreSQL connection
+import { pool } from "../../../lib/db"; // PostgreSQL connection
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
+  // 1. Security Check: Verify if it is a Dify tool or authorized request
+  const authHeader = req.headers.authorization;
+  const toolSecret = process.env.DIFY_TOOL_SECRET;
+
+  // If a Secret is configured, perform Bearer Token verification
+  if (toolSecret && authHeader !== `Bearer ${toolSecret}`) {
+    return res.status(401).json({ error: 'Unauthorized: Access to the registration endpoint is not allowed' });
+  }
+
+  // 2. Request Method Check
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Method not allowed" });
+  }
 
   const { name, email, password } = req.body;
-  if (!name || !email || !password) return res.status(400).json({ error: "Missing fields" });
+
+  // 3. Field Integrity Check
+  if (!name || !email || !password) {
+    return res.status(400).json({ error: "Missing fields: Please provide name, email, and password" });
+  }
 
   try {
-    // Check if user exists
+    // 4. Check if user already exists
     const existing = await pool.query("SELECT * FROM users WHERE email=$1", [email]);
-    if (existing.rows.length > 0) return res.status(400).json({ error: "Email already registered" });
+    if (existing.rows.length > 0) {
+      return res.status(400).json({ error: "Email already registered: This email is already in use" });
+    }
 
+    // 5. Password Encryption
     const hashed = await bcrypt.hash(password, 10);
 
+    // 6. Write to Database
     const result = await pool.query(
       "INSERT INTO users (name, email, password, role, is_active) VALUES ($1, $2, $3, $4, $5) RETURNING id, name, email, role",
       [name, email, hashed, "user", false]
@@ -22,15 +42,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const user = result.rows[0];
 
-    // Set cookie for session
+    // 7. Set Session Cookie
     res.setHeader(
       "Set-Cookie",
-      `token=${user.id}; HttpOnly; Path=/; Max-Age=${60 * 60 * 24}` // simple cookie by user id
+      `token=${user.id}; HttpOnly; Path=/; Max-Age=${60 * 60 * 24}` 
     );
 
-    res.status(201).json({ user });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Internal server error" });
+    // 8. Return Success Response
+    return res.status(201).json({ 
+      status: 'success',
+      message: 'Registration request received and being processed',
+      user 
+    });
+
+  } catch (err: any) {
+    // 9. Fault Protection and Logging
+    console.error('[Register API Error]:', err.message);
+    return res.status(500).json({ error: "Internal server error: Database connection abnormality" });
   }
 }

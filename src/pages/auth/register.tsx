@@ -8,6 +8,8 @@ export default function RegisterPage() {
   const router = useRouter();
   const { register } = useAuth();
 
+  const isDifyEnabled = process.env.NEXT_PUBLIC_ENABLE_DIFY === 'true';
+
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -102,7 +104,9 @@ export default function RegisterPage() {
       </div>
 
       {/* 傳入 handleAiSuccess 函數 */}
-      <AiRegister onRegistrationSuccess={handleAiSuccess} />
+      {isDifyEnabled && (
+        <AiRegister onRegistrationSuccess={handleAiSuccess} />
+      )}
     </>
   );
 }
