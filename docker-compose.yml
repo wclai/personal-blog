@@ -24,6 +24,7 @@ services:
       JWT_SECRET: "dd88a4663489485272ec638830c6a352"
       NEXTAUTH_SECRET: "dd88a4663489485272ec638830c6a352"
       PROFILE_PHOTO_DIR: "/home/ubuntu/profile_photos"
+      NEXT_PUBLIC_ENABLE_DIFY: "false"
     ports:
       - "80:3000"
     volumes:

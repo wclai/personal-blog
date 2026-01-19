@@ -42,6 +42,37 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const user = result.rows[0];
 
+    // Trigger n8n Webhook to send email
+    const n8nWebhookUrl = process.env.N8N_REGISTRATION_WEBHOOK_URL;
+    console.log('Target n8n URL:', n8nWebhookUrl);
+    if (n8nWebhookUrl) {
+      try {
+        console.log("正在呼叫 n8n...");
+        const n8nRes = await fetch(n8nWebhookUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: user.name, email: user.email }),
+        });
+        console.log("n8n 回傳狀態碼:", n8nRes.status);
+      } catch (fetchErr) {
+        console.error("n8n 呼叫徹底失敗:", fetchErr);
+      }
+    }
+    /*
+    if (n8nWebhookUrl) {
+      fetch(n8nWebhookUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          event: "user_registered",
+          name: user.name,
+          email: user.email,
+          timestamp: new Date().toISOString()
+        }),
+      }).catch(err => console.error('[n8n Webhook Error]:', err.message));
+    }
+    */
+
     // 7. Set Session Cookie
     res.setHeader(
       "Set-Cookie",
